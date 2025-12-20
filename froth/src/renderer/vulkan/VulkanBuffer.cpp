@@ -109,7 +109,7 @@ bool VulkanBuffer::copyBuffer(const VulkanBuffer &src, const VulkanBuffer &dest,
     return false;
   }
 
-  // FIXME: Requires copies are done sequentially
+  // PERF: Requires copies are done sequentially
   if (vkQueueWaitIdle(vctx.device().getQueueFamilies().graphics.queue) != VK_SUCCESS) {
     FROTH_WARN("Failed to wait for queue idle");
     return false;

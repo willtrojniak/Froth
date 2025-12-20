@@ -191,6 +191,11 @@ void VulkanRenderer::setDescriptorTexture(const VulkanSampler &sampler, const Vu
   writer.Write();
 }
 
+void VulkanRenderer::bindMesh(const Mesh &mesh) const {
+  bindVertexBuffer(mesh.vertexBuffer());
+  bindIndexBuffer(mesh.indexBuffer());
+}
+
 void VulkanRenderer::bindVertexBuffer(const VulkanVertexBuffer &vertexBuffer) const {
   // TODO: Handle dynamic offsets
   VkDeviceSize offsets[] = {0};

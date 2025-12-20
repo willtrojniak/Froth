@@ -10,6 +10,8 @@ class Texture2D : public Resource {
 public:
   Texture2D(const Extent2D &extent, const void *data);
   virtual ResourceType type() const noexcept override final { return ResourceType::Texture2D; }
+
+  // TODO: Abstract
   const VulkanImageView &view() const { return m_Texture.view(); }
 
 private:

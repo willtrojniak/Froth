@@ -18,7 +18,9 @@
 #include "src/renderer/vulkan/VulkanSurface.h"
 #include "src/renderer/vulkan/VulkanSwapchainManager.h"
 #include "src/renderer/vulkan/VulkanTexture.h"
+#include "src/renderer/vulkan/VulkanVertex.h"
 #include "src/renderer/vulkan/VulkanVertexBuffer.h"
+#include "src/resources/Mesh.h"
 #include "src/resources/materials/Material.h"
 #include <memory>
 #include <vector>
@@ -54,6 +56,7 @@ public:
   VulkanDescriptorPool &getDescriptorPool() { return m_DescriptorPool; }
   void setDescriptorTexture(const VulkanSampler &sampler, const VulkanImageView &view);
 
+  void bindMesh(const Mesh &mesh) const;
   void bindVertexBuffer(const VulkanVertexBuffer &buffer) const;
   void bindIndexBuffer(const VulkanIndexBuffer &buffer) const;
 
