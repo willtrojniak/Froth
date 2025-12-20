@@ -1,6 +1,5 @@
 #pragma once
 
-#include "glm/ext/matrix_float4x4.hpp"
 #include "src/core/events/ApplicationEvent.h"
 #include "src/platform/window/Window.h"
 #include "src/renderer/Renderer.h"
@@ -18,6 +17,7 @@
 #include "src/renderer/vulkan/VulkanSampler.h"
 #include "src/renderer/vulkan/VulkanSurface.h"
 #include "src/renderer/vulkan/VulkanSwapchainManager.h"
+#include "src/renderer/vulkan/VulkanTexture.h"
 #include "src/renderer/vulkan/VulkanVertexBuffer.h"
 #include "src/resources/materials/Material.h"
 #include <memory>
@@ -56,6 +56,8 @@ public:
 
   void bindVertexBuffer(const VulkanVertexBuffer &buffer) const;
   void bindIndexBuffer(const VulkanIndexBuffer &buffer) const;
+
+  VulkanTexture createTexture(const VkExtent3D &extent, VkFormat format, const void *data);
 
 protected:
   /* Creates a Vulkan Renderer backend

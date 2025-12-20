@@ -15,7 +15,14 @@ namespace Froth {
 
 #define BIND_FUNC(x) std::bind(&Application::x, this, std::placeholders::_1)
 
+Application *Application::s_Application = nullptr;
+
 Application::Application() {
+  if (s_Application) {
+    FROTH_ERROR("Attempted to create second application");
+  }
+  s_Application = this;
+
   FROTH_INFO("Creating Application with Froth v%d.%d.%d", FROTH_VERSION_MAJOR, FROTH_VERSION_MINOR, FROTH_VERSION_PATCH)
   m_Window = Window::createWindow(640, 480, "Hello World");
   if (!m_Window) {

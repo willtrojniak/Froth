@@ -1,19 +1,20 @@
+#pragma once
+
 #include "VulkanImage.h"
-#include "src/resources/Texture.h"
+#include "src/renderer/vulkan/VulkanImageView.h"
 
 namespace Froth {
 
-class VulkanTexture : public VulkanImage, public Texture {
+class VulkanTexture : public VulkanImage {
 public:
+  friend class VulkanRenderer;
   VulkanTexture() = default;
-  VulkanTexture(const VkExtent3D &extent, const VkFormat format)
-      : VulkanImage(CreateInfo{
-            .extent = extent,
-            .format = format,
-            .tiling = VK_IMAGE_TILING_OPTIMAL,
-            .usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-            .memPropFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT}) {
-  }
+  const VulkanImageView &view() const { return m_View; }
+
+protected:
+  VulkanTexture(const VkExtent3D &extent, VkFormat format);
+
+  VulkanImageView m_View;
 };
 
 } // namespace Froth

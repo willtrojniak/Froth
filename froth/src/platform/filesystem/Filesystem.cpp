@@ -6,7 +6,6 @@
 #include <fstream>
 
 #include <stb/stb_image.h>
-#include <unordered_map>
 
 namespace Froth::Filesystem {
 

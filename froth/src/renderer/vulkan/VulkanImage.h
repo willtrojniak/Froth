@@ -21,6 +21,9 @@ public:
 
   operator VkImage() const { return m_Image; }
   const VkExtent3D &extent() const { return m_Extent; }
+  size_t sizeBytes() const {
+    return m_Extent.width * m_Extent.height * m_Extent.depth * 4; // FIXME: Channels
+  }
   void cleanup();
   VulkanImageView createView(VkFormat format, VkImageAspectFlags aspect) const;
 

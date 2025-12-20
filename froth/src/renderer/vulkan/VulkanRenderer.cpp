@@ -206,6 +206,28 @@ void VulkanRenderer::bindIndexBuffer(const VulkanIndexBuffer &indexBuffer) const
   vkCmdDrawIndexed(m_SwapchainManager.currentCommandBuffer(), indexBuffer.indexCount(), 1, 0, 0, 0);
 }
 
+VulkanTexture VulkanRenderer::createTexture(const VkExtent3D &extent, VkFormat format, const void *data) {
+  Froth::VulkanCommandPool &commandPool = getGraphicsCommandPool();
+  Froth::VulkanCommandBuffer commandBuffer = commandPool.AllocateCommandBuffer();
+
+  VulkanTexture texture(extent, format);
+
+  size_t imageSizeBytes = texture.sizeBytes();
+  VulkanBuffer stagingBuffer(imageSizeBytes, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+  void *dest = stagingBuffer.map();
+  memcpy(dest, data, imageSizeBytes);
+  stagingBuffer.unmap();
+
+  texture.transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+  commandBuffer.reset();
+  VulkanBuffer::copyBufferToImage(commandBuffer, stagingBuffer, texture);
+  commandBuffer.reset();
+  texture.transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+  commandBuffer.cleanup(commandPool);
+  return texture;
+}
+
 // TODO: Remove temporary
 VulkanCommandPool &VulkanRenderer::getCurrentCommandPool() {
   return m_SwapchainManager.currentCommandPool();

@@ -10,6 +10,8 @@
 #include "src/renderer/vulkan/VulkanImage.h"
 #include "src/renderer/vulkan/VulkanIndexBuffer.h"
 #include "src/renderer/vulkan/VulkanVertexBuffer.h"
+#include "src/resources/ResourceManager.h"
+#include "src/resources/Texture2D.h"
 #include <vector>
 
 #define GLM_ENABLE_EXPERIMENTAL
@@ -52,7 +54,10 @@ public:
         {{-groundSize, groundSize, 0.f}, {.3f, .3f, .3f}, {0.f, 0.f, 1.f}, {0.f, 0.f}},
     };
     std::vector<uint32_t> plane_indices = {0, 1, 2, 2, 3, 0};
-    if (!Froth::Filesystem::loadObj(CUBE_MODEL_PATH.c_str(), plane_vertices, plane_indices)) {
+
+    std::vector<Froth::Vertex> cube_vertices;
+    std::vector<uint32_t> cube_indices;
+    if (!Froth::Filesystem::loadObj(CUBE_MODEL_PATH.c_str(), cube_vertices, cube_indices)) {
     }
 
     m_VertexBuffer2 = Froth::VulkanVertexBuffer(sizeof(Froth::Vertex) * plane_vertices.size());
@@ -60,6 +65,13 @@ public:
     commandBuffer.reset();
     m_IndexBuffer2 = Froth::VulkanIndexBuffer(plane_indices.size());
     m_IndexBuffer2.write(commandBuffer, plane_indices.size(), plane_indices.data());
+    commandBuffer.reset();
+
+    m_VertexBuffer3 = Froth::VulkanVertexBuffer(sizeof(Froth::Vertex) * cube_vertices.size());
+    m_VertexBuffer3.write(commandBuffer, sizeof(Froth::Vertex) * cube_vertices.size(), cube_vertices.data());
+    commandBuffer.reset();
+    m_IndexBuffer3 = Froth::VulkanIndexBuffer(cube_indices.size());
+    m_IndexBuffer3.write(commandBuffer, cube_indices.size(), cube_indices.data());
     commandBuffer.reset();
 
     std::vector<char> vertShaderCode = Froth::Filesystem::readFile("../playground/shaders/vert.spv");
@@ -71,34 +83,10 @@ public:
     m_Material = Froth::Material(vertShaderModule, fragShaderModule);
 
     // Texture
-    int imageWidth, imageHeight, imageChannels;
-    size_t imageSize;
-    void *pixels = Froth::Filesystem::loadImage(TEXTURE_PATH.c_str(), imageWidth, imageHeight, imageChannels);
-    imageSize = imageHeight * imageWidth * imageChannels;
+    std::shared_ptr<Froth::Texture2D> texture = m_ResourceManager.importResource<Froth::Texture2D>(TEXTURE_PATH);
 
-    Froth::VulkanBuffer textureStagingBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-    void *data = textureStagingBuffer.map();
-    memcpy(data, pixels, imageSize);
-    textureStagingBuffer.unmap();
-
-    Froth::Filesystem::freeImage(pixels);
-
-    m_Texture = Froth::VulkanImage(Froth::VulkanImage::CreateInfo{
-        .extent = {static_cast<uint32_t>(imageWidth), static_cast<uint32_t>(imageHeight), 1},
-        .format = VK_FORMAT_R8G8B8A8_SRGB,
-        .tiling = VK_IMAGE_TILING_OPTIMAL,
-        .usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-        .memPropFlags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-    });
-    m_Texture.transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-    commandBuffer.reset();
-    Froth::VulkanBuffer::copyBufferToImage(commandBuffer, textureStagingBuffer, m_Texture);
-    commandBuffer.reset();
-    m_Texture.transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-
-    m_TextureView = m_Texture.createView(VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT);
     m_Sampler = Froth::VulkanSampler::Builder().build();
-    m_Renderer.setDescriptorTexture(m_Sampler, m_TextureView);
+    m_Renderer.setDescriptorTexture(m_Sampler, texture->view());
 
     commandBuffer.cleanup(commandPool);
     m_Camera = Froth::Camera(glm::vec3(0.0f, -5.0f, 1.0f), 90.f, 0.f);
@@ -141,12 +129,24 @@ public:
     m_Renderer.bindVertexBuffer(m_VertexBuffer);
     m_Renderer.bindIndexBuffer(m_IndexBuffer);
 
-    mvp = proj * view * glm::translate(glm::vec3(2.f, 1.f, -0.01f));
+    mvp = proj * view * glm::translate(glm::vec3(-5.0f, -5.0f, -0.1f)) * glm::scale(glm::vec3(10.f, 10.f, 0.1f));
     texIndex = 0;
     m_Renderer.pushConstants(VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(mvp), &mvp);
     m_Renderer.pushConstants(VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(mvp), sizeof(texIndex), &texIndex);
-    m_Renderer.bindVertexBuffer(m_VertexBuffer2);
-    m_Renderer.bindIndexBuffer(m_IndexBuffer2);
+    m_Renderer.bindVertexBuffer(m_VertexBuffer3);
+    m_Renderer.bindIndexBuffer(m_IndexBuffer3);
+
+    mvp = proj * view * glm::translate(glm::vec3(2.f, 1.f, -0.01f));
+    m_Renderer.pushConstants(VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(mvp), &mvp);
+    m_Renderer.pushConstants(VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(mvp), sizeof(texIndex), &texIndex);
+    m_Renderer.bindVertexBuffer(m_VertexBuffer3);
+    m_Renderer.bindIndexBuffer(m_IndexBuffer3);
+
+    mvp = proj * view * glm::translate(glm::vec3(-2.f, -2.f, -0.01f)) * glm::scale(glm::vec3(0.5f, 0.5f, 0.5f));
+    m_Renderer.pushConstants(VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(mvp), &mvp);
+    m_Renderer.pushConstants(VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(mvp), sizeof(texIndex), &texIndex);
+    m_Renderer.bindVertexBuffer(m_VertexBuffer3);
+    m_Renderer.bindIndexBuffer(m_IndexBuffer3);
   }
 
   bool onWindowResize(Froth::WindowResizeEvent &e) {
@@ -177,14 +177,15 @@ public:
   };
 
 private:
+  Froth::ResourceManager m_ResourceManager;
   Froth::VulkanRenderer &m_Renderer;
   Froth::VulkanIndexBuffer m_IndexBuffer;
   Froth::VulkanVertexBuffer m_VertexBuffer;
   Froth::VulkanIndexBuffer m_IndexBuffer2;
   Froth::VulkanVertexBuffer m_VertexBuffer2;
+  Froth::VulkanIndexBuffer m_IndexBuffer3;
+  Froth::VulkanVertexBuffer m_VertexBuffer3;
   Froth::Material m_Material;
-  Froth::VulkanImage m_Texture;
-  Froth::VulkanImageView m_TextureView;
   Froth::VulkanSampler m_Sampler;
   Froth::Camera m_Camera;
   InputController m_InputController;
@@ -197,7 +198,6 @@ private:
 class Playground : public Froth::Application {
 public:
   Playground() {
-    /*pushLayer(std::make_unique<VulkanTriangle>(window()));*/
     pushLayer(std::make_unique<TestLayer>(renderer()));
   }
 };

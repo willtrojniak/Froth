@@ -1,11 +1,14 @@
 #include "TextureImporter.h"
 #include "src/core/logger/Logger.h"
 #include "src/platform/filesystem/Filesystem.h"
-#include "src/renderer/vulkan/VulkanTexture.h"
 
 namespace Froth {
 
-static std::shared_ptr<Texture> LoadTexture2D(const std::filesystem::path &path) {
+std::shared_ptr<Texture2D> TextureImporter::ImportTexture2D(const ResourceMetadata &metadata) {
+  return LoadTexture2D(metadata.FilePath);
+}
+
+std::shared_ptr<Texture2D> TextureImporter::LoadTexture2D(const std::filesystem::path &path) {
 
   int width, height, channels;
   void *data = Filesystem::loadImage(path.c_str(), width, height, channels);
@@ -15,13 +18,13 @@ static std::shared_ptr<Texture> LoadTexture2D(const std::filesystem::path &path)
     return nullptr;
   }
 
-  VkExtent3D extent{
+  Extent2D extent{
       .width = static_cast<uint32_t>(width),
       .height = static_cast<uint32_t>(height),
-      .depth = 1,
   };
-  std::shared_ptr<VulkanTexture> pTexture = std::make_shared<VulkanTexture>(extent, VK_FORMAT_R8G8B8A8_SRGB);
-  // TODO: Upload data to the texture and transition the image layout
+
+  // TODO: Dynamic format based on data
+  std::shared_ptr<Texture2D> pTexture = std::make_shared<Texture2D>(extent, data);
 
   Filesystem::freeImage(data);
   return pTexture;

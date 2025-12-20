@@ -10,7 +10,7 @@ using ResourceHandle = UUID;
 
 enum class ResourceType : uint16_t {
   None = 0,
-  Texture,
+  Texture2D,
 };
 
 class Resource {
