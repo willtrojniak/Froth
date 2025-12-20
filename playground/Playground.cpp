@@ -94,7 +94,6 @@ public:
 
   void onUpdate(double ts) override {
     const float moveSpeed = 2.f;
-
     if (m_InputController.isPressed(Froth::Key::W)) {
       m_Camera.moveForward(ts * moveSpeed);
     }
@@ -113,7 +112,9 @@ public:
     if (m_InputController.isPressed(Froth::Key::E)) {
       m_Camera.moveUp(ts * moveSpeed);
     }
+  }
 
+  void onDraw(double ts) override {
     glm::mat4 model = glm::translate(glm::mat4(1.0), glm::vec3(0.f, 0.f, 0.107647f));
     glm::mat4 view = m_Camera.view();
     glm::mat4 proj = glm::perspective(glm::radians(45.0f), m_Width / (float)m_Height, 0.1f, 100.0f);

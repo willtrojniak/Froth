@@ -50,11 +50,16 @@ void Application::Run() {
   while (m_Running) {
     Window::pollEvents();
 
-    m_Renderer.beginFrame();
-    m_Renderer.beginRenderPass();
-    // TODO: Seperate onUpdate into onUpdate and onDraw for example
+    // Update loop
     for (std::shared_ptr<Layer> layer : m_LayerStack) {
       layer->onUpdate(deltaT);
+    }
+
+    // Draw loop
+    m_Renderer.beginFrame();
+    m_Renderer.beginRenderPass();
+    for (std::shared_ptr<Layer> layer : m_LayerStack) {
+      layer->onDraw(deltaT); // TODO: Check deltaTS
     }
     m_Renderer.endRenderPass();
     m_Renderer.endFrame();

@@ -10,6 +10,7 @@ public:
   virtual void onAttach() {}
   virtual void onDetatch() {}
   virtual void onUpdate(double ts) {}
+  virtual void onDraw(double ts) {}
   virtual bool onEvent(const Event &e) { return false; }
 };
 } // namespace Froth
