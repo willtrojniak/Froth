@@ -19,6 +19,14 @@ VulkanShaderModule::VulkanShaderModule(const std::vector<char> &code, VkShaderSt
   }
 }
 
+VulkanShaderModule &VulkanShaderModule::operator=(VulkanShaderModule &&o) noexcept {
+  m_ShaderModule = o.m_ShaderModule;
+  m_Stage = o.m_Stage;
+
+  o.m_ShaderModule = nullptr;
+  return *this;
+}
+
 VkPipelineShaderStageCreateInfo VulkanShaderModule::pipelineStageInfo() const {
   VkPipelineShaderStageCreateInfo createInfo{};
   createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;

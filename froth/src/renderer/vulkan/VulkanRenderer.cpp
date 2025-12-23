@@ -187,8 +187,8 @@ VulkanTexture VulkanRenderer::createTexture(const VkExtent3D &extent, VkFormat f
   return texture;
 }
 
-Shader VulkanRenderer::createShader(const Material &mat) {
-  return Shader(mat.vert(), mat.frag(), m_SwapchainManager);
+Shader VulkanRenderer::createShader(const VulkanShaderModule &vert, const VulkanShaderModule &frag) {
+  return Shader(vert, frag, m_SwapchainManager);
 }
 
 // TODO: Remove temporary

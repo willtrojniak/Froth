@@ -4,7 +4,6 @@
 
 #include "src/core/events/EventDispatcher.h"
 #include "src/core/events/MouseEvent.h"
-#include "src/core/logger/Logger.h"
 #include "src/modules/camera/Camera.h"
 #include "src/platform/filesystem/Filesystem.h"
 #include "src/platform/keys/Keycodes.h"
@@ -39,12 +38,11 @@ public:
     std::vector<char> vertShaderCode = Froth::Filesystem::readFile("../playground/shaders/vert.spv");
     std::vector<char> fragShaderCode = Froth::Filesystem::readFile("../playground/shaders/frag.spv");
 
-    std::shared_ptr<Froth::VulkanShaderModule> vertShaderModule = std::make_shared<Froth::VulkanShaderModule>(vertShaderCode, VK_SHADER_STAGE_VERTEX_BIT);
-    std::shared_ptr<Froth::VulkanShaderModule> fragShaderModule = std::make_shared<Froth::VulkanShaderModule>(fragShaderCode, VK_SHADER_STAGE_FRAGMENT_BIT);
+    m_Vert = Froth::VulkanShaderModule(vertShaderCode, VK_SHADER_STAGE_VERTEX_BIT);
+    m_Frag = Froth::VulkanShaderModule(fragShaderCode, VK_SHADER_STAGE_FRAGMENT_BIT);
+    m_Shader = m_Renderer.createShader(m_Vert, m_Frag);
 
-    m_Material = Froth::Material(vertShaderModule, fragShaderModule);
-    m_Shader = m_Renderer.createShader(m_Material);
-    m_DescriptorSets = renderer.getDescriptorPool().allocateDescriptorSets(std::vector<VkDescriptorSetLayout>{m_Shader.descriptorSets()[0], m_Shader.descriptorSets()[0]});
+    m_DescriptorSets = renderer.getDescriptorPool().allocateDescriptorSets(std::vector<VkDescriptorSetLayout>(2, m_Shader.descriptorSets()[0]));
 
     // Blank Texture
     uint32_t blankImageData = 0xFFFFFFFF;
@@ -160,7 +158,8 @@ private:
   Froth::Texture2D m_BlankTexture2D;
   std::vector<VkDescriptorSet> m_DescriptorSets;
   Froth::VulkanSampler m_Sampler;
-  Froth::Material m_Material;
+  Froth::VulkanShaderModule m_Vert;
+  Froth::VulkanShaderModule m_Frag;
   Froth::Camera m_Camera;
   InputController m_InputController;
   uint32_t m_Width = 600;

@@ -60,7 +60,7 @@ public:
   uint32_t currentFrame() const { return m_SwapchainManager.currentFrame(); }
 
   VulkanTexture createTexture(const VkExtent3D &extent, VkFormat format, const void *data);
-  Shader createShader(const Material &mat);
+  Shader createShader(const VulkanShaderModule &vert, const VulkanShaderModule &frag);
 
 protected:
   /* Creates a Vulkan Renderer backend

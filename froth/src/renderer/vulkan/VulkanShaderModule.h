@@ -9,9 +9,11 @@ namespace Froth {
 class VulkanShaderModule {
 
 public:
+  VulkanShaderModule() = default;
   VulkanShaderModule(const std::vector<char> &code, VkShaderStageFlagBits stage);
   VulkanShaderModule(VulkanShaderModule const &) = delete;
-  void operator=(VulkanShaderModule const &) = delete;
+  VulkanShaderModule &operator=(VulkanShaderModule const &) = delete;
+  VulkanShaderModule &operator=(VulkanShaderModule &&) noexcept;
   ~VulkanShaderModule();
 
   operator VkShaderModule() const { return m_ShaderModule; }
@@ -20,7 +22,7 @@ public:
   void cleanup();
 
 private:
-  VkShaderModule m_ShaderModule;
+  VkShaderModule m_ShaderModule = nullptr;
   VkShaderStageFlagBits m_Stage;
 };
 
