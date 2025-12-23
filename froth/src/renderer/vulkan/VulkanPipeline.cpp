@@ -52,6 +52,18 @@ VulkanPipeline::VulkanPipeline(const VulkanPipelineLayout &pipelineLayout,
   }
 }
 
+VulkanPipeline::VulkanPipeline(VulkanPipeline &&o) noexcept
+    : m_Pipeline(o.m_Pipeline) {
+  o.m_Pipeline = nullptr;
+}
+
+VulkanPipeline &VulkanPipeline::operator=(VulkanPipeline &&o) noexcept {
+  m_Pipeline = o.m_Pipeline;
+
+  o.m_Pipeline = nullptr;
+  return *this;
+}
+
 VulkanPipeline::~VulkanPipeline() {
   cleanup();
 }

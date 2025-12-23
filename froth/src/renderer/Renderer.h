@@ -1,7 +1,6 @@
 #pragma once
 
 #include "src/platform/window/Window.h"
-#include "src/resources/materials/Material.h"
 #include <memory>
 
 namespace Froth {
@@ -19,8 +18,6 @@ public:
   virtual void beginRenderPass() = 0;
   virtual void endRenderPass() = 0;
   virtual void endFrame() = 0;
-
-  virtual void bindMaterial(const Material &mat) = 0;
 
   /* Creates an abstract Renderer backend
    *

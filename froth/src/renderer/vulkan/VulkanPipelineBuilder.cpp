@@ -1,7 +1,5 @@
 #include "VulkanPipelineBuilder.h"
 
-#include <memory>
-
 namespace Froth {
 
 VulkanPipelineBuilder::VulkanPipelineBuilder() noexcept {
@@ -62,7 +60,7 @@ VulkanPipelineBuilder::VulkanPipelineBuilder() noexcept {
   m_DepthStencilInfo.back = {};
 }
 
-std::unique_ptr<VulkanPipeline> VulkanPipelineBuilder::build(const VulkanRenderPass &renderPass, const VulkanPipelineLayout &pipelineLayout) {
+VulkanPipeline VulkanPipelineBuilder::build(const VulkanRenderPass &renderPass, const VulkanPipelineLayout &pipelineLayout) {
 
   // Dynamic State
   VkPipelineDynamicStateCreateInfo dynamicState{};
@@ -82,10 +80,10 @@ std::unique_ptr<VulkanPipeline> VulkanPipelineBuilder::build(const VulkanRenderP
   colorBlendInfo.blendConstants[2] = 0.0f;
   colorBlendInfo.blendConstants[3] = 0.0f;
 
-  return std::make_unique<VulkanPipeline>(pipelineLayout, renderPass,
-                                          m_ShaderStages, m_VertexInputInfo, m_InputAssemblyInfo,
-                                          m_Viewport, m_Scissor, m_RasterizerInfo, m_MultisampleInfo,
-                                          m_DepthStencilInfo, colorBlendInfo, dynamicState);
+  return VulkanPipeline(pipelineLayout, renderPass,
+                        m_ShaderStages, m_VertexInputInfo, m_InputAssemblyInfo,
+                        m_Viewport, m_Scissor, m_RasterizerInfo, m_MultisampleInfo,
+                        m_DepthStencilInfo, colorBlendInfo, dynamicState);
 }
 
 VulkanPipelineBuilder &VulkanPipelineBuilder::setShaders(const VulkanShaderModule &vertexShader, const VulkanShaderModule &fragmentShader) {

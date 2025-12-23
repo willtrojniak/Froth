@@ -31,11 +31,11 @@ public:
   VulkanRenderer &renderer() { return m_Renderer; }
 
 private:
+  static Application *s_Application;
   bool m_Running = true;
   std::unique_ptr<Window> m_Window;
-  LayerStack m_LayerStack;
   VulkanRenderer m_Renderer;
-  static Application *s_Application;
+  LayerStack m_LayerStack;
 };
 Application *CreateApplication();
 } // namespace Froth

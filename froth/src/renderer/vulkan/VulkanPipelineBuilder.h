@@ -2,7 +2,6 @@
 
 #include "VulkanPipeline.h"
 #include "VulkanShaderModule.h"
-#include <memory>
 #include <vector>
 
 namespace Froth {
@@ -32,7 +31,7 @@ public:
   VulkanPipelineBuilder &setDepthStencil(const VkPipelineDepthStencilStateCreateInfo &depthStencilInfo);
   VulkanPipelineBuilder &setDynamicStates(const std::vector<VkDynamicState> &states);
 
-  std::unique_ptr<VulkanPipeline> build(const VulkanRenderPass &renderPass, const VulkanPipelineLayout &pipelineLayout);
+  VulkanPipeline build(const VulkanRenderPass &renderPass, const VulkanPipelineLayout &pipelineLayout);
 };
 
 } // namespace Froth

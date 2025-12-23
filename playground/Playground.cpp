@@ -4,9 +4,11 @@
 
 #include "src/core/events/EventDispatcher.h"
 #include "src/core/events/MouseEvent.h"
+#include "src/core/logger/Logger.h"
 #include "src/modules/camera/Camera.h"
 #include "src/platform/filesystem/Filesystem.h"
 #include "src/platform/keys/Keycodes.h"
+#include "src/renderer/vulkan/VulkanDescriptorSet.h"
 #include "src/renderer/vulkan/VulkanImage.h"
 #include "src/renderer/vulkan/VulkanIndexBuffer.h"
 #include "src/renderer/vulkan/VulkanVertexBuffer.h"
@@ -34,15 +36,6 @@ public:
     m_VikingMeshHandle = m_ResourceManager.importResource<Froth::Mesh>(MODEL_PATH.c_str())->handle();
     m_CubeMeshHandle = m_ResourceManager.importResource<Froth::Mesh>(CUBE_MODEL_PATH.c_str())->handle();
 
-    const float groundSize = 4.0f;
-    std::vector<Froth::Vertex> plane_vertices = {
-        {{-groundSize, -groundSize, 0.f}, {.3f, .3f, .3f}, {0.f, 0.f, 1.f}, {0.f, 0.f}},
-        {{groundSize, -groundSize, 0.f}, {.3f, .3f, .3f}, {0.f, 0.f, 1.f}, {0.f, 0.f}},
-        {{groundSize, groundSize, 0.f}, {.3f, .3f, .3f}, {0.f, 0.f, 1.f}, {0.f, 0.f}},
-        {{-groundSize, groundSize, 0.f}, {.3f, .3f, .3f}, {0.f, 0.f, 1.f}, {0.f, 0.f}},
-    };
-    std::vector<uint32_t> plane_indices = {0, 1, 2, 2, 3, 0};
-
     std::vector<char> vertShaderCode = Froth::Filesystem::readFile("../playground/shaders/vert.spv");
     std::vector<char> fragShaderCode = Froth::Filesystem::readFile("../playground/shaders/frag.spv");
 
@@ -50,12 +43,23 @@ public:
     std::shared_ptr<Froth::VulkanShaderModule> fragShaderModule = std::make_shared<Froth::VulkanShaderModule>(fragShaderCode, VK_SHADER_STAGE_FRAGMENT_BIT);
 
     m_Material = Froth::Material(vertShaderModule, fragShaderModule);
+    m_Shader = m_Renderer.createShader(m_Material);
+    m_DescriptorSets = renderer.getDescriptorPool().allocateDescriptorSets(std::vector<VkDescriptorSetLayout>{m_Shader.descriptorSets()[0], m_Shader.descriptorSets()[0]});
 
-    // Texture
+    // Blank Texture
+    uint32_t blankImageData = 0xFFFFFFFF;
+    Froth::Texture2D m_BlankTexture2D(Froth::Extent2D{.width = 1, .height = 1}, &blankImageData);
+
+    // Viking Texture
     std::shared_ptr<Froth::Texture2D> texture = m_ResourceManager.importResource<Froth::Texture2D>(TEXTURE_PATH);
-
     m_Sampler = Froth::VulkanSampler::Builder().build();
-    m_Renderer.setDescriptorTexture(m_Sampler, texture->view());
+
+    auto writer = Froth::VulkanDescriptorSet::Writer();
+    for (auto descriptorSet : m_DescriptorSets) {
+      writer.addImageSampler(descriptorSet, 0, m_BlankTexture2D.view(), m_Sampler, 0);
+      writer.addImageSampler(descriptorSet, 0, texture->view(), m_Sampler, 1);
+    }
+    writer.Write();
 
     m_Camera = Froth::Camera(glm::vec3(0.0f, -5.0f, 1.0f), 90.f, 0.f);
   }
@@ -88,29 +92,31 @@ public:
     glm::mat4 proj = glm::perspective(glm::radians(45.0f), m_Width / (float)m_Height, 0.1f, 100.0f);
     proj[1][1] *= -1;
 
-    glm::mat4 mvp = proj * view * model;
+    glm::mat4 vp = proj * view;
+    glm::mat4 mvp = vp * model;
     uint32_t texIndex = 1;
 
-    m_Renderer.bindMaterial(m_Material);
+    m_Renderer.bindShader(m_Shader);
+    m_Renderer.bindDescriptorSets(m_Shader, 0, std::vector{m_DescriptorSets[m_Renderer.currentFrame()]});
 
-    m_Renderer.pushConstants(VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(mvp), &mvp);
-    m_Renderer.pushConstants(VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(mvp), sizeof(texIndex), &texIndex);
+    m_Renderer.pushConstants(m_Shader, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(mvp), &mvp);
+    m_Renderer.pushConstants(m_Shader, VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(mvp), sizeof(texIndex), &texIndex);
     m_Renderer.bindMesh(*m_ResourceManager.getResource<Froth::Mesh>(m_VikingMeshHandle));
 
-    mvp = proj * view * glm::translate(glm::vec3(-5.0f, -5.0f, -0.1f)) * glm::scale(glm::vec3(10.f, 10.f, 0.1f));
+    mvp = vp * glm::translate(glm::vec3(-5.0f, -5.0f, -0.1f)) * glm::scale(glm::vec3(10.f, 10.f, 0.1f));
     texIndex = 0;
-    m_Renderer.pushConstants(VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(mvp), &mvp);
-    m_Renderer.pushConstants(VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(mvp), sizeof(texIndex), &texIndex);
+    m_Renderer.pushConstants(m_Shader, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(mvp), &mvp);
+    m_Renderer.pushConstants(m_Shader, VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(mvp), sizeof(texIndex), &texIndex);
     m_Renderer.bindMesh(*m_ResourceManager.getResource<Froth::Mesh>(m_CubeMeshHandle));
 
-    mvp = proj * view * glm::translate(glm::vec3(2.f, 1.f, -0.01f));
-    m_Renderer.pushConstants(VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(mvp), &mvp);
-    m_Renderer.pushConstants(VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(mvp), sizeof(texIndex), &texIndex);
+    mvp = vp * glm::translate(glm::vec3(2.f, 1.f, -0.01f));
+    m_Renderer.pushConstants(m_Shader, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(mvp), &mvp);
+    m_Renderer.pushConstants(m_Shader, VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(mvp), sizeof(texIndex), &texIndex);
     m_Renderer.bindMesh(*m_ResourceManager.getResource<Froth::Mesh>(m_CubeMeshHandle));
 
-    mvp = proj * view * glm::translate(glm::vec3(-2.f, -2.f, -0.01f)) * glm::scale(glm::vec3(0.5f, 0.5f, 0.5f));
-    m_Renderer.pushConstants(VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(mvp), &mvp);
-    m_Renderer.pushConstants(VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(mvp), sizeof(texIndex), &texIndex);
+    mvp = vp * glm::translate(glm::vec3(-2.f, -2.f, -0.01f)) * glm::scale(glm::vec3(0.5f, 0.5f, 0.5f));
+    m_Renderer.pushConstants(m_Shader, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(mvp), &mvp);
+    m_Renderer.pushConstants(m_Shader, VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(mvp), sizeof(texIndex), &texIndex);
     m_Renderer.bindMesh(*m_ResourceManager.getResource<Froth::Mesh>(m_CubeMeshHandle));
   }
 
@@ -141,13 +147,20 @@ public:
   virtual void onDetatch() override final {
   };
 
+  ~TestLayer() {
+    m_Renderer.getDescriptorPool().freeDescriptorSets(m_DescriptorSets);
+  }
+
 private:
   Froth::VulkanRenderer &m_Renderer;
   Froth::ResourceManager m_ResourceManager;
   Froth::ResourceHandle m_VikingMeshHandle;
   Froth::ResourceHandle m_CubeMeshHandle;
-  Froth::Material m_Material;
+  Froth::Shader m_Shader;
+  Froth::Texture2D m_BlankTexture2D;
+  std::vector<VkDescriptorSet> m_DescriptorSets;
   Froth::VulkanSampler m_Sampler;
+  Froth::Material m_Material;
   Froth::Camera m_Camera;
   InputController m_InputController;
   uint32_t m_Width = 600;

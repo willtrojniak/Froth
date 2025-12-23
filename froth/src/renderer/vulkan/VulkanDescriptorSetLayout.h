@@ -8,7 +8,7 @@ namespace Froth {
 class VulkanDescriptorSetLayout {
 public:
   VulkanDescriptorSetLayout() = default;
-  VulkanDescriptorSetLayout(const std::vector<VkDescriptorSetLayoutBinding> &data);
+  VulkanDescriptorSetLayout(const std::vector<VkDescriptorSetLayoutBinding> &bindings);
   VulkanDescriptorSetLayout(VulkanDescriptorSetLayout const &) = delete;
   void operator=(VulkanDescriptorSetLayout const &) = delete;
 

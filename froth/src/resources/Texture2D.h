@@ -8,6 +8,7 @@ namespace Froth {
 
 class Texture2D : public Resource {
 public:
+  Texture2D() = default;
   Texture2D(const Extent2D &extent, const void *data);
   virtual ResourceType type() const noexcept override final { return ResourceType::Texture2D; }
 

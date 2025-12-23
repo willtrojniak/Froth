@@ -1,5 +1,6 @@
 #include "Mesh.h"
 #include "src/core/Application.h"
+#include "src/core/logger/Logger.h"
 
 namespace Froth {
 
@@ -20,6 +21,8 @@ Mesh::Mesh(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &ind
   commandBuffer.reset();
 
   commandBuffer.cleanup(commandPool);
+
+  FROTH_DEBUG("Loaded Mesh");
 }
 
 } // namespace Froth

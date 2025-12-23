@@ -7,6 +7,7 @@ namespace Froth {
 
 class VulkanPipeline {
 public:
+  VulkanPipeline() = default;
   VulkanPipeline(const VulkanPipelineLayout &pipelineLayout,
                  const VulkanRenderPass &renderPass,
                  const std::vector<VkPipelineShaderStageCreateInfo> &shaderStages,
@@ -23,11 +24,13 @@ public:
 
   VulkanPipeline(VulkanPipeline const &) = delete;
   VulkanPipeline &operator=(VulkanPipeline const &) = delete;
+  VulkanPipeline(VulkanPipeline &&) noexcept;
+  VulkanPipeline &operator=(VulkanPipeline &&) noexcept;
 
   operator VkPipeline() const { return m_Pipeline; }
 
 private:
-  VkPipeline m_Pipeline;
+  VkPipeline m_Pipeline = nullptr;
 
   void cleanup();
 };

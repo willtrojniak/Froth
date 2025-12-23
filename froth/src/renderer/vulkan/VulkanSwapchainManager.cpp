@@ -75,6 +75,7 @@ void VulkanSwapchainManager::onWindowFramebufferResize(uint32_t width, uint32_t 
 }
 
 void VulkanSwapchainManager::rebuild() {
+  FROTH_DEBUG("Rebuilding Swap Chain");
   vkDeviceWaitIdle(VulkanContext::get().device());
 
   m_Framebuffers.clear();
@@ -97,6 +98,7 @@ void VulkanSwapchainManager::rebuild() {
 
   createFramebuffers();
   m_ShouldRebuild = false;
+  FROTH_DEBUG("Rebuilt Swap Chain");
 }
 
 void VulkanSwapchainManager::createFramebuffers() {

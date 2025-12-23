@@ -49,6 +49,7 @@ std::vector<VkDescriptorSet> VulkanDescriptorPool::allocateDescriptorSets(const 
   if (vkAllocateDescriptorSets(vctx.device(), &allocInfo, sets.data()) != VK_SUCCESS) {
     FROTH_ERROR("Failed to allocate descriptor sets")
   }
+  FROTH_DEBUG("Allocated descriptor sets")
   return sets;
 }
 
