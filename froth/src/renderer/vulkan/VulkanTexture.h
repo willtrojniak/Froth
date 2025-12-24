@@ -7,11 +7,11 @@ namespace Froth {
 
 class VulkanTexture : public VulkanImage {
 public:
-  friend class VulkanRenderer;
   VulkanTexture() = default;
   const VulkanImageView &view() const { return m_View; }
+  static VulkanTexture create(const VkExtent3D &extent, VkFormat format, const void *data);
 
-protected:
+private:
   VulkanTexture(const VkExtent3D &extent, VkFormat format);
 
   VulkanImageView m_View;

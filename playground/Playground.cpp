@@ -10,6 +10,7 @@
 #include "src/renderer/vulkan/VulkanDescriptorSet.h"
 #include "src/renderer/vulkan/VulkanImage.h"
 #include "src/renderer/vulkan/VulkanIndexBuffer.h"
+#include "src/renderer/vulkan/VulkanUniformBuffer.h"
 #include "src/renderer/vulkan/VulkanVertexBuffer.h"
 #include "src/resources/Mesh.h"
 #include "src/resources/ResourceManager.h"
@@ -29,8 +30,14 @@ const std::string TEXTURE_JPG_PATH = "../playground/textures/texture.jpg";
 
 class TestLayer : public Froth::Layer {
 public:
+  struct ViewProjUbo {
+    glm::mat4 view;
+    glm::mat4 proj;
+    glm::vec4 cameraPos;
+  };
+
   TestLayer(Froth::VulkanRenderer &renderer)
-      : m_Renderer(renderer) {
+      : m_Renderer(renderer), m_Camera(glm::vec3(0.0f, -5.0f, 1.0f), 90.f, 0.f) {
 
     m_VikingMeshHandle = m_ResourceManager.importResource<Froth::Mesh>(MODEL_PATH.c_str())->handle();
     m_CubeMeshHandle = m_ResourceManager.importResource<Froth::Mesh>(CUBE_MODEL_PATH.c_str())->handle();
@@ -42,7 +49,47 @@ public:
     m_Frag = Froth::VulkanShaderModule(fragShaderCode, VK_SHADER_STAGE_FRAGMENT_BIT);
     m_Shader = m_Renderer.createShader(m_Vert, m_Frag);
 
+    // TODO: Remove
+    struct Light {
+      glm::vec4 pos;
+      glm::vec4 color;
+      float constant;
+      float linear;
+      float quadratic;
+    } light;
+
+    light.pos = glm::vec4(-1.75f, -1.75f, 0.5f, 1.0f);
+    light.color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+    light.constant = 0.0f;
+    light.linear = 0.0f;
+    light.quadratic = 5.0f;
+
     m_DescriptorSets = renderer.getDescriptorPool().allocateDescriptorSets(std::vector<VkDescriptorSetLayout>(2, m_Shader.descriptorSets()[0]));
+    m_ViewProjUbos.reserve(2);
+    m_ViewProjUbos.emplace_back(sizeof(ViewProjUbo));
+    m_ViewProjUbos.emplace_back(sizeof(ViewProjUbo));
+
+    m_LightUbos.reserve(2);
+    m_LightUbos.emplace_back(sizeof(Light));
+    m_LightUbos.emplace_back(sizeof(Light));
+
+    glm::mat4 view = m_Camera.view();
+    glm::mat4 proj = glm::perspective(glm::radians(45.0f), m_Width / (float)m_Height, 0.1f, 100.0f);
+    proj[1][1] *= -1;
+
+    ViewProjUbo vp{
+        .view = view,
+        .proj = proj,
+        .cameraPos = glm::vec4(m_Camera.pos(), 1.0f),
+    };
+
+    Froth::VulkanCommandPool &commandPool = m_Renderer.getGraphicsCommandPool();
+    Froth::VulkanCommandBuffer commandBuffer = commandPool.AllocateCommandBuffer();
+    m_LightUbos[0].write(commandBuffer, sizeof(Light), &light);
+    m_LightUbos[1].write(commandBuffer, sizeof(Light), &light);
+    m_ViewProjUbos[0].write(commandBuffer, sizeof(ViewProjUbo), &vp);
+    m_ViewProjUbos[1].write(commandBuffer, sizeof(ViewProjUbo), &vp);
+    commandBuffer.cleanup(commandPool);
 
     // Blank Texture
     uint32_t blankImageData = 0xFFFFFFFF;
@@ -53,13 +100,14 @@ public:
     m_Sampler = Froth::VulkanSampler::Builder().build();
 
     auto writer = Froth::VulkanDescriptorSet::Writer();
-    for (auto descriptorSet : m_DescriptorSets) {
-      writer.addImageSampler(descriptorSet, 0, m_BlankTexture2D.view(), m_Sampler, 0);
-      writer.addImageSampler(descriptorSet, 0, texture->view(), m_Sampler, 1);
+    for (size_t i = 0; i < m_DescriptorSets.size(); i++) {
+      auto descriptorSet = m_DescriptorSets[i];
+      writer.addUniform(descriptorSet, 0, m_ViewProjUbos[i], 0);
+      writer.addUniform(descriptorSet, 1, m_LightUbos[i], 0);
+      writer.addImageSampler(descriptorSet, 2, m_BlankTexture2D.view(), m_Sampler, 0);
+      writer.addImageSampler(descriptorSet, 2, texture->view(), m_Sampler, 1);
     }
     writer.Write();
-
-    m_Camera = Froth::Camera(glm::vec3(0.0f, -5.0f, 1.0f), 90.f, 0.f);
   }
 
   void onUpdate(double ts) override {
@@ -84,37 +132,43 @@ public:
     }
   }
 
-  void onDraw(double ts) override {
+  void onDraw(uint32_t frame) override {
     glm::mat4 model = glm::translate(glm::mat4(1.0), glm::vec3(0.f, 0.f, 0.107647f));
     glm::mat4 view = m_Camera.view();
     glm::mat4 proj = glm::perspective(glm::radians(45.0f), m_Width / (float)m_Height, 0.1f, 100.0f);
     proj[1][1] *= -1;
 
-    glm::mat4 vp = proj * view;
-    glm::mat4 mvp = vp * model;
+    ViewProjUbo vp{
+        .view = view,
+        .proj = proj,
+        .cameraPos = glm::vec4(m_Camera.pos(), 1.0f),
+    };
+
+    Froth::VulkanCommandPool &commandPool = m_Renderer.getGraphicsCommandPool();
+    Froth::VulkanCommandBuffer commandBuffer = commandPool.AllocateCommandBuffer();
+    m_ViewProjUbos[frame].write(commandBuffer, sizeof(ViewProjUbo), &vp);
+    commandBuffer.cleanup(commandPool);
+
     uint32_t texIndex = 1;
-
     m_Renderer.bindShader(m_Shader);
-    m_Renderer.bindDescriptorSets(m_Shader, 0, std::vector{m_DescriptorSets[m_Renderer.currentFrame()]});
+    m_Renderer.bindDescriptorSets(m_Shader, 0, std::vector{m_DescriptorSets[frame]});
 
-    m_Renderer.pushConstants(m_Shader, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(mvp), &mvp);
-    m_Renderer.pushConstants(m_Shader, VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(mvp), sizeof(texIndex), &texIndex);
+    m_Renderer.pushConstants(m_Shader, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(model), &model);
+    m_Renderer.pushConstants(m_Shader, VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(model), sizeof(texIndex), &texIndex);
     m_Renderer.bindMesh(*m_ResourceManager.getResource<Froth::Mesh>(m_VikingMeshHandle));
 
-    mvp = vp * glm::translate(glm::vec3(-5.0f, -5.0f, -0.1f)) * glm::scale(glm::vec3(10.f, 10.f, 0.1f));
     texIndex = 0;
-    m_Renderer.pushConstants(m_Shader, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(mvp), &mvp);
-    m_Renderer.pushConstants(m_Shader, VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(mvp), sizeof(texIndex), &texIndex);
+    model = glm::translate(glm::vec3(-5.0f, -5.0f, -0.1f)) * glm::scale(glm::vec3(10.f, 10.f, 0.1f));
+    m_Renderer.pushConstants(m_Shader, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(model), &model);
+    m_Renderer.pushConstants(m_Shader, VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(model), sizeof(texIndex), &texIndex);
     m_Renderer.bindMesh(*m_ResourceManager.getResource<Froth::Mesh>(m_CubeMeshHandle));
 
-    mvp = vp * glm::translate(glm::vec3(2.f, 1.f, -0.01f));
-    m_Renderer.pushConstants(m_Shader, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(mvp), &mvp);
-    m_Renderer.pushConstants(m_Shader, VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(mvp), sizeof(texIndex), &texIndex);
+    model = glm::translate(glm::vec3(2.f, 1.f, -0.01f));
+    m_Renderer.pushConstants(m_Shader, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(model), &model);
     m_Renderer.bindMesh(*m_ResourceManager.getResource<Froth::Mesh>(m_CubeMeshHandle));
 
-    mvp = vp * glm::translate(glm::vec3(-2.f, -2.f, -0.01f)) * glm::scale(glm::vec3(0.5f, 0.5f, 0.5f));
-    m_Renderer.pushConstants(m_Shader, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(mvp), &mvp);
-    m_Renderer.pushConstants(m_Shader, VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(mvp), sizeof(texIndex), &texIndex);
+    model = glm::translate(glm::vec3(-2.f, -2.f, -0.01f)) * glm::scale(glm::vec3(0.5f, 0.5f, 0.5f));
+    m_Renderer.pushConstants(m_Shader, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(model), &model);
     m_Renderer.bindMesh(*m_ResourceManager.getResource<Froth::Mesh>(m_CubeMeshHandle));
   }
 
@@ -157,6 +211,8 @@ private:
   Froth::Shader m_Shader;
   Froth::Texture2D m_BlankTexture2D;
   std::vector<VkDescriptorSet> m_DescriptorSets;
+  std::vector<Froth::VulkanUniformBuffer> m_ViewProjUbos;
+  std::vector<Froth::VulkanUniformBuffer> m_LightUbos;
   Froth::VulkanSampler m_Sampler;
   Froth::VulkanShaderModule m_Vert;
   Froth::VulkanShaderModule m_Frag;

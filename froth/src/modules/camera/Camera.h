@@ -18,6 +18,7 @@ public:
   void moveUp(float speed);
 
   glm::mat4 view() const;
+  glm::vec3 pos() const { return m_Pos; }
 
 private:
   glm::vec3 m_Pos;

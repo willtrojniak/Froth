@@ -6,10 +6,10 @@
 #include <cstdint>
 
 namespace Froth {
-static const uint32_t MAX_FRAMES_IN_FLIGHT = 2;
 
-VulkanSwapchainManager::VulkanSwapchainManager(const Window &win)
-    : m_Surface(win.createVulkanSurface()),
+VulkanSwapchainManager::VulkanSwapchainManager(const Window &win, uint32_t maxFramesInFlight)
+    : m_MaxFramesInFlight(maxFramesInFlight),
+      m_Surface(win.createVulkanSurface()),
       m_Swapchain(VulkanSwapchain::create(m_Surface, nullptr)),
       m_DepthImage(VulkanImage::CreateInfo{
           .extent = {.width = m_Swapchain.extent().width, .height = m_Swapchain.extent().height, .depth = 1},
@@ -25,7 +25,8 @@ VulkanSwapchainManager::VulkanSwapchainManager(const Window &win)
 }
 
 VulkanSwapchainManager::VulkanSwapchainManager(VulkanSwapchainManager &&o) noexcept
-    : m_Surface(std::move(o.m_Surface)),
+    : m_MaxFramesInFlight(o.m_MaxFramesInFlight),
+      m_Surface(std::move(o.m_Surface)),
       m_Swapchain(std::move(o.m_Swapchain)),
       m_DepthImage(std::move(o.m_DepthImage)),
       m_DepthImageView(std::move(o.m_DepthImageView)),
@@ -43,6 +44,7 @@ VulkanSwapchainManager::VulkanSwapchainManager(VulkanSwapchainManager &&o) noexc
 }
 
 VulkanSwapchainManager &VulkanSwapchainManager::operator=(VulkanSwapchainManager &&o) noexcept {
+  m_MaxFramesInFlight = o.m_MaxFramesInFlight;
   m_Surface = std::move(o.m_Surface);
   m_Swapchain = std::move(o.m_Swapchain);
   m_DepthImage = std::move(o.m_DepthImage);
@@ -63,7 +65,7 @@ VulkanSwapchainManager &VulkanSwapchainManager::operator=(VulkanSwapchainManager
 }
 
 VulkanSwapchainManager::~VulkanSwapchainManager() {
-  for (uint32_t i = 0; i < MAX_FRAMES_IN_FLIGHT && i < m_CommandBuffers.size(); i++) {
+  for (uint32_t i = 0; i < m_MaxFramesInFlight && i < m_CommandBuffers.size(); i++) {
     m_CommandBuffers[i].cleanup(m_CommandPools[i]);
     FROTH_DEBUG("Cleaned up swapchain command buffer");
   }
@@ -117,13 +119,13 @@ void VulkanSwapchainManager::createFramebuffers() {
 void VulkanSwapchainManager::createFrameData() {
   VulkanContext &vctx = VulkanContext::get();
 
-  m_ImageAvailableSemaphores.reserve(MAX_FRAMES_IN_FLIGHT);
-  m_RenderCompleteSemaphores.reserve(MAX_FRAMES_IN_FLIGHT);
-  m_FrameInFlightFences.reserve(MAX_FRAMES_IN_FLIGHT);
-  m_CommandPools.reserve(MAX_FRAMES_IN_FLIGHT);
-  m_CommandBuffers.reserve(MAX_FRAMES_IN_FLIGHT);
+  m_ImageAvailableSemaphores.reserve(m_MaxFramesInFlight);
+  m_RenderCompleteSemaphores.reserve(m_MaxFramesInFlight);
+  m_FrameInFlightFences.reserve(m_MaxFramesInFlight);
+  m_CommandPools.reserve(m_MaxFramesInFlight);
+  m_CommandBuffers.reserve(m_MaxFramesInFlight);
 
-  for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+  for (size_t i = 0; i < m_MaxFramesInFlight; i++) {
     // Semaphores + Fences
     m_ImageAvailableSemaphores.emplace_back();
     m_RenderCompleteSemaphores.emplace_back();
@@ -208,7 +210,7 @@ void VulkanSwapchainManager::endFrame() {
     FROTH_ERROR("Failed to present swap chain image");
   }
 
-  m_CurrentFrame = (m_CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+  m_CurrentFrame = (m_CurrentFrame + 1) % m_MaxFramesInFlight;
 }
 
 } // namespace Froth

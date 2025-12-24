@@ -7,25 +7,28 @@ namespace Froth {
 
 Shader::Shader(const VulkanShaderModule &vert, const VulkanShaderModule &frag, const VulkanSwapchainManager &swapchainManager) {
   // TODO: Customizable descriptor set layout - consider reading from shaders?
-  // VkDescriptorSetLayoutBinding uboLayoutBinding{};
-  // uboLayoutBinding.binding = 0;
-  // uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-  // uboLayoutBinding.descriptorCount = 1;
-  // uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-  // uboLayoutBinding.pImmutableSamplers = nullptr;
+  VkDescriptorSetLayoutBinding uboLayoutBinding{};
+  uboLayoutBinding.binding = 0;
+  uboLayoutBinding.descriptorCount = 1;
+  uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+  uboLayoutBinding.pImmutableSamplers = VK_NULL_HANDLE;
+  uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+  VkDescriptorSetLayoutBinding uboLayoutBindingLights{};
+  uboLayoutBindingLights.binding = 1;
+  uboLayoutBindingLights.descriptorCount = 1;
+  uboLayoutBindingLights.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+  uboLayoutBindingLights.pImmutableSamplers = VK_NULL_HANDLE;
+  uboLayoutBindingLights.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
   VkDescriptorSetLayoutBinding samplerLayoutBinding{};
-  samplerLayoutBinding.binding = 0;
+  samplerLayoutBinding.binding = 2;
   samplerLayoutBinding.descriptorCount = 4; // Array size
   samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
   samplerLayoutBinding.pImmutableSamplers = VK_NULL_HANDLE;
   samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
-  // std::array<VkDescriptorSetLayoutBinding, 2> bindings = {uboLayoutBinding, samplerLayoutBinding};
-  std::vector<VkDescriptorSetLayoutBinding> bindings = {samplerLayoutBinding};
-
-  m_DescriptorSetLayouts = std::vector<VulkanDescriptorSetLayout>();
-  m_DescriptorSetLayouts.emplace_back(bindings);
+  m_DescriptorSetLayouts.emplace_back(std::vector{uboLayoutBinding, uboLayoutBindingLights, samplerLayoutBinding});
 
   // TODO: Bring out push constants to make configurable
   m_PipelineLayout = VulkanPipelineLayout(m_DescriptorSetLayouts);

@@ -16,12 +16,12 @@ VulkanVertexBuffer::VulkanVertexBuffer(const VkDeviceSize &size)
 }
 
 VulkanVertexBuffer::VulkanVertexBuffer(VulkanVertexBuffer &&o) noexcept
-    : VulkanBuffer(std::forward<VulkanVertexBuffer>(o)),
-      m_StagingBuffer(std::forward<VulkanBuffer>(o.m_StagingBuffer)) {
+    : VulkanBuffer(std::move(o)),
+      m_StagingBuffer(std::move(o.m_StagingBuffer)) {
 }
 VulkanVertexBuffer &VulkanVertexBuffer::operator=(VulkanVertexBuffer &&o) noexcept {
-  VulkanBuffer::operator=(std::forward<VulkanVertexBuffer>(o));
-  m_StagingBuffer = std::forward<VulkanBuffer>(o.m_StagingBuffer);
+  VulkanBuffer::operator=(std::move(o));
+  m_StagingBuffer = std::move(o.m_StagingBuffer);
 
   return *this;
 }

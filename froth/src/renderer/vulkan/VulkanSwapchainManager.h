@@ -16,11 +16,12 @@ namespace Froth {
 class VulkanSwapchainManager {
 public:
   VulkanSwapchainManager() = default;
-  VulkanSwapchainManager(const Window &window);
+  VulkanSwapchainManager(const Window &window, uint32_t maxFramesInFlight);
   VulkanSwapchainManager(const VulkanSwapchainManager &) = delete;
   VulkanSwapchainManager &operator=(const VulkanSwapchainManager &) = delete;
   VulkanSwapchainManager(VulkanSwapchainManager &&) noexcept;
   VulkanSwapchainManager &operator=(VulkanSwapchainManager &&) noexcept;
+
   ~VulkanSwapchainManager();
 
   void setShouldRebuild() { m_ShouldRebuild = true; }
@@ -39,7 +40,7 @@ public:
   VulkanCommandPool &currentCommandPool() { return m_CommandPools[m_CurrentFrame]; }
   const VulkanCommandBuffer &currentCommandBuffer() const { return m_CommandBuffers[m_CurrentFrame]; }
   const VulkanFramebuffer &currentFramebuffer() const { return m_Framebuffers[m_CurrentImageIndex]; }
-
+  uint32_t maxFramesInFlight() const { return m_MaxFramesInFlight; }
   void presentImage();
 
 private:
@@ -63,6 +64,7 @@ private:
   bool m_ShouldRebuild = false;
   void createFrameData();
   void createFramebuffers();
+  uint32_t m_MaxFramesInFlight;
 };
 
 } // namespace Froth

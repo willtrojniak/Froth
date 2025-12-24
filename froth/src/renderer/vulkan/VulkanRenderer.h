@@ -9,16 +9,12 @@
 #include "src/renderer/vulkan/VulkanDescriptorPool.h"
 #include "src/renderer/vulkan/VulkanDevice.h"
 #include "src/renderer/vulkan/VulkanImage.h"
-#include "src/renderer/vulkan/VulkanImageView.h"
 #include "src/renderer/vulkan/VulkanIndexBuffer.h"
-#include "src/renderer/vulkan/VulkanSampler.h"
 #include "src/renderer/vulkan/VulkanSurface.h"
 #include "src/renderer/vulkan/VulkanSwapchainManager.h"
-#include "src/renderer/vulkan/VulkanTexture.h"
 #include "src/renderer/vulkan/VulkanVertexBuffer.h"
 #include "src/resources/Mesh.h"
 #include "src/resources/Shader.h"
-#include "src/resources/materials/Material.h"
 #include <memory>
 #include <vector>
 
@@ -44,22 +40,19 @@ public:
   virtual void beginRenderPass() override;
   virtual void endRenderPass() override;
   virtual void endFrame() override;
+  uint32_t currentFrame() const { return m_SwapchainManager.currentFrame(); }
 
-  virtual void bindShader(const Shader &shader) const;
-  void pushConstants(const Shader &shader, VkShaderStageFlags stage, uint32_t offset, uint32_t size, const void *pData) const;
-
-  VulkanCommandPool &getCurrentCommandPool();
   VulkanCommandPool &getGraphicsCommandPool() { return m_GraphicsCommandPool; };
   VulkanDescriptorPool &getDescriptorPool() { return m_DescriptorPool; }
 
+  void bindShader(const Shader &shader) const;
   void bindMesh(const Mesh &mesh) const;
+  void pushConstants(const Shader &shader, VkShaderStageFlags stage, uint32_t offset, uint32_t size, const void *pData) const;
   void bindDescriptorSets(const Shader &shader, uint32_t start, const std::vector<VkDescriptorSet> &sets) const;
   void bindDescriptorSets(const Shader &shader, uint32_t start, const std::vector<VkDescriptorSet> &sets, const std::vector<uint32_t> &offsets) const;
   void bindVertexBuffer(const VulkanVertexBuffer &buffer) const;
   void bindIndexBuffer(const VulkanIndexBuffer &buffer) const;
-  uint32_t currentFrame() const { return m_SwapchainManager.currentFrame(); }
 
-  VulkanTexture createTexture(const VkExtent3D &extent, VkFormat format, const void *data);
   Shader createShader(const VulkanShaderModule &vert, const VulkanShaderModule &frag);
 
 protected:

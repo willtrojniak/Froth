@@ -4,11 +4,8 @@
 #include "VulkanVertexBuffer.h"
 #include "src/core/events/ApplicationEvent.h"
 #include "src/core/events/EventDispatcher.h"
-#include "src/core/logger/Logger.h"
-#include "src/renderer/vulkan/VulkanBuffer.h"
 #include "src/renderer/vulkan/VulkanContext.h"
 #include "src/renderer/vulkan/VulkanImage.h"
-#include "src/resources/materials/Material.h"
 #include <cstdint>
 #include <memory>
 #include <utility>
@@ -25,26 +22,23 @@ bool getRequiredExtensions(std::vector<const char *> &extensions) noexcept;
 bool hasLayers(const std::vector<const char *> &layers) noexcept;
 
 VulkanRenderer::VulkanRenderer(const Window &window)
-    : m_SwapchainManager(window),
-      m_DescriptorPool(MAX_FRAMES_IN_FLIGHT, 0, MAX_FRAMES_IN_FLIGHT * 4),
+    : m_SwapchainManager(window, MAX_FRAMES_IN_FLIGHT),
+      m_DescriptorPool(MAX_FRAMES_IN_FLIGHT, MAX_FRAMES_IN_FLIGHT * 2, MAX_FRAMES_IN_FLIGHT * 4),
       m_GraphicsCommandPool(VulkanContext::get().device().getQueueFamilies().graphics.index) {
 }
 
 VulkanRenderer::~VulkanRenderer() {
-  // m_DescriptorPool.freeDescriptorSets(m_DescriptorSets);
 }
 
 VulkanRenderer::VulkanRenderer(VulkanRenderer &&o)
     : m_SwapchainManager(std::move(o.m_SwapchainManager)),
       m_DescriptorPool(std::move(o.m_DescriptorPool)),
-      // m_DescriptorSets(std::move(o.m_DescriptorSets)),
       m_GraphicsCommandPool(std::move(o.m_GraphicsCommandPool)) {
 }
 
 VulkanRenderer &VulkanRenderer::operator=(VulkanRenderer &&o) {
   m_SwapchainManager = std::move(o.m_SwapchainManager);
   m_DescriptorPool = std::move(o.m_DescriptorPool);
-  // m_DescriptorSets = std::move(o.m_DescriptorSets);
   m_GraphicsCommandPool = std::move(o.m_GraphicsCommandPool);
 
   return *this;
@@ -164,36 +158,8 @@ void VulkanRenderer::bindIndexBuffer(const VulkanIndexBuffer &indexBuffer) const
   vkCmdDrawIndexed(m_SwapchainManager.currentCommandBuffer(), indexBuffer.indexCount(), 1, 0, 0, 0);
 }
 
-VulkanTexture VulkanRenderer::createTexture(const VkExtent3D &extent, VkFormat format, const void *data) {
-  Froth::VulkanCommandPool &commandPool = getGraphicsCommandPool();
-  Froth::VulkanCommandBuffer commandBuffer = commandPool.AllocateCommandBuffer();
-
-  VulkanTexture texture(extent, format);
-
-  size_t imageSizeBytes = texture.sizeBytes();
-  VulkanBuffer stagingBuffer(imageSizeBytes, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-  void *dest = stagingBuffer.map();
-  memcpy(dest, data, imageSizeBytes);
-  stagingBuffer.unmap();
-
-  texture.transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-  commandBuffer.reset();
-  VulkanBuffer::copyBufferToImage(commandBuffer, stagingBuffer, texture);
-  commandBuffer.reset();
-  texture.transitionLayout(commandBuffer, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-
-  commandBuffer.cleanup(commandPool);
-  FROTH_DEBUG("Created texture");
-  return texture;
-}
-
 Shader VulkanRenderer::createShader(const VulkanShaderModule &vert, const VulkanShaderModule &frag) {
   return Shader(vert, frag, m_SwapchainManager);
-}
-
-// TODO: Remove temporary
-VulkanCommandPool &VulkanRenderer::getCurrentCommandPool() {
-  return m_SwapchainManager.currentCommandPool();
 }
 
 } // namespace Froth

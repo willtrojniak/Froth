@@ -59,7 +59,7 @@ void Application::Run() {
     m_Renderer.beginFrame();
     m_Renderer.beginRenderPass();
     for (std::shared_ptr<Layer> layer : m_LayerStack) {
-      layer->onDraw(deltaT); // TODO: Check deltaTS
+      layer->onDraw(m_Renderer.currentFrame());
     }
     m_Renderer.endRenderPass();
     m_Renderer.endFrame();

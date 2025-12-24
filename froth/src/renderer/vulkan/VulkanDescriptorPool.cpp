@@ -8,7 +8,7 @@ namespace Froth {
 
 VulkanDescriptorPool::VulkanDescriptorPool(uint32_t maxSets, uint32_t maxUniformBuffers, uint32_t maxImageSamplers) {
   std::array<VkDescriptorPoolSize, 2> poolSizes{};
-  poolSizes[0].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+  poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; // TODO: Add dynamic uniform buffers too
   poolSizes[0].descriptorCount = maxUniformBuffers;
   poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
   poolSizes[1].descriptorCount = maxImageSamplers;
