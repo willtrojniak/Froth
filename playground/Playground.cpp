@@ -99,13 +99,10 @@ public:
         .cameraPos = glm::vec4(m_Camera.pos(), 1.0f),
     };
 
-    Froth::VulkanCommandPool &commandPool = m_Renderer.getGraphicsCommandPool();
-    Froth::VulkanCommandBuffer commandBuffer = commandPool.AllocateCommandBuffer();
-    m_LightUbos[0].write(commandBuffer, sizeof(lightUBO), &lightUBO);
-    m_LightUbos[1].write(commandBuffer, sizeof(lightUBO), &lightUBO);
-    m_ViewProjUbos[0].write(commandBuffer, sizeof(ViewProjUbo), &vp);
-    m_ViewProjUbos[1].write(commandBuffer, sizeof(ViewProjUbo), &vp);
-    commandBuffer.cleanup(commandPool);
+    m_LightUbos[0].write(sizeof(lightUBO), &lightUBO);
+    m_LightUbos[1].write(sizeof(lightUBO), &lightUBO);
+    m_ViewProjUbos[0].write(sizeof(ViewProjUbo), &vp);
+    m_ViewProjUbos[1].write(sizeof(ViewProjUbo), &vp);
 
     // Blank Texture
     uint32_t blankImageData = 0xFFFFFFFF;
@@ -159,10 +156,7 @@ public:
         .cameraPos = glm::vec4(m_Camera.pos(), 1.0f),
     };
 
-    Froth::VulkanCommandPool &commandPool = m_Renderer.getGraphicsCommandPool();
-    Froth::VulkanCommandBuffer commandBuffer = commandPool.AllocateCommandBuffer();
-    m_ViewProjUbos[frame].write(commandBuffer, sizeof(ViewProjUbo), &vp);
-    commandBuffer.cleanup(commandPool);
+    m_ViewProjUbos[frame].write(sizeof(ViewProjUbo), &vp);
 
     uint32_t texIndex = 1;
     m_Renderer.bindShader(m_Shader);
