@@ -23,7 +23,6 @@ bool hasLayers(const std::vector<const char *> &layers) noexcept;
 
 VulkanRenderer::VulkanRenderer(const Window &window)
     : m_SwapchainManager(window, MAX_FRAMES_IN_FLIGHT),
-      m_DescriptorPool(MAX_FRAMES_IN_FLIGHT, MAX_FRAMES_IN_FLIGHT * 2, MAX_FRAMES_IN_FLIGHT * 4),
       m_GraphicsCommandPool(VulkanContext::get().device().getQueueFamilies().graphics.index) {
 }
 
@@ -32,13 +31,11 @@ VulkanRenderer::~VulkanRenderer() {
 
 VulkanRenderer::VulkanRenderer(VulkanRenderer &&o)
     : m_SwapchainManager(std::move(o.m_SwapchainManager)),
-      m_DescriptorPool(std::move(o.m_DescriptorPool)),
       m_GraphicsCommandPool(std::move(o.m_GraphicsCommandPool)) {
 }
 
 VulkanRenderer &VulkanRenderer::operator=(VulkanRenderer &&o) {
   m_SwapchainManager = std::move(o.m_SwapchainManager);
-  m_DescriptorPool = std::move(o.m_DescriptorPool);
   m_GraphicsCommandPool = std::move(o.m_GraphicsCommandPool);
 
   return *this;
@@ -154,7 +151,7 @@ void VulkanRenderer::bindIndexBuffer(const VulkanIndexBuffer &indexBuffer) const
   // TODO: Handle offsets
   vkCmdBindIndexBuffer(m_SwapchainManager.currentCommandBuffer(), indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
-  // TODO: Seperate into another call?
+  // PERF: Seperate into another call?
   vkCmdDrawIndexed(m_SwapchainManager.currentCommandBuffer(), indexBuffer.indexCount(), 1, 0, 0, 0);
 }
 

@@ -1,15 +1,14 @@
 #version 450
-#define MAX_LIGHTS 10
+#define MAX_LIGHTS 3
+
+struct Light {
+    vec4 pos;
+    vec4 color;
+    vec4 params;
+};
 
 layout(binding = 1) uniform UniformBufferObject {
-    // vec3 pos[MAX_LIGHTS];
-    // vec3 col[MAX_LIGHTS];
-    // float intensity[MAX_LIGHTS];
-    vec4 pos;
-    vec4 col;
-    float constant;
-    float linear;
-    float quadratic;
+    Light lights[MAX_LIGHTS];
 } lights_ubo;
 
 layout(binding = 2) uniform sampler2D texSampler[2];
@@ -52,7 +51,9 @@ void main() {
     vec3 result = vec3(0, 0, 0);
     result += lightAmbient;
     result += directionalLight(lightDir, lightCol, norm);
-    result += pointLight(vec3(lights_ubo.pos), vec3(lights_ubo.col), lights_ubo.constant, lights_ubo.linear, lights_ubo.quadratic, norm, vec3(worldPos));
+    for (int i = 0; i < MAX_LIGHTS; i++) {
+        result += pointLight(vec3(lights_ubo.lights[i].pos), vec3(lights_ubo.lights[i].color), lights_ubo.lights[i].params.x, lights_ubo.lights[i].params.y, lights_ubo.lights[i].params.z, norm, vec3(worldPos));
+    }
     result *= vec3(fragColor) * vec3(texture(texSampler[pcs.texIndex], texCoord));
     outColor = vec4(result, 1.0);
 }

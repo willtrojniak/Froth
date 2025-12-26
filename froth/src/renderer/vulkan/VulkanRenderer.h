@@ -6,7 +6,6 @@
 #include "src/renderer/vulkan/VulkanCommandBuffer.h"
 #include "src/renderer/vulkan/VulkanCommandPool.h"
 #include "src/renderer/vulkan/VulkanContext.h"
-#include "src/renderer/vulkan/VulkanDescriptorPool.h"
 #include "src/renderer/vulkan/VulkanDevice.h"
 #include "src/renderer/vulkan/VulkanImage.h"
 #include "src/renderer/vulkan/VulkanIndexBuffer.h"
@@ -36,14 +35,13 @@ public:
   virtual bool onEvent(const Event &e) override;
   bool onFramebufferResize(FramebufferResizeEvent &e);
 
+  uint32_t currentFrame() const { return m_SwapchainManager.currentFrame(); }
   virtual bool beginFrame() override;
   virtual void beginRenderPass() override;
   virtual void endRenderPass() override;
   virtual void endFrame() override;
-  uint32_t currentFrame() const { return m_SwapchainManager.currentFrame(); }
 
   VulkanCommandPool &getGraphicsCommandPool() { return m_GraphicsCommandPool; };
-  VulkanDescriptorPool &getDescriptorPool() { return m_DescriptorPool; }
 
   void bindShader(const Shader &shader) const;
   void bindMesh(const Mesh &mesh) const;
@@ -67,6 +65,5 @@ protected:
 private:
   VulkanCommandPool m_GraphicsCommandPool;
   VulkanSwapchainManager m_SwapchainManager;
-  VulkanDescriptorPool m_DescriptorPool;
 };
 } // namespace Froth

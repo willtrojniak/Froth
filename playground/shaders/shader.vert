@@ -23,7 +23,10 @@ layout(location = 3) out vec2 fragTexCoord;
 void main() {
     worldPos = pcs.model * vec4(inPosition, 1.0);
     gl_Position = ubo.proj * ubo.view * worldPos;
+
+    mat3 normalMatrix = transpose(inverse(mat3(pcs.model)));
+    fragNorm = normalize(normalMatrix * inNorm);
+
     fragColor = inColor;
-    fragNorm = inNorm;
     fragTexCoord = inTexCoord;
 }
