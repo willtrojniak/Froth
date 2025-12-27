@@ -56,10 +56,7 @@ public:
 
     std::vector<char> vertShaderCode = Froth::Filesystem::readFile("../playground/shaders/vert.spv");
     std::vector<char> fragShaderCode = Froth::Filesystem::readFile("../playground/shaders/frag.spv");
-
-    m_Vert = Froth::VulkanShaderModule(vertShaderCode, VK_SHADER_STAGE_VERTEX_BIT);
-    m_Frag = Froth::VulkanShaderModule(fragShaderCode, VK_SHADER_STAGE_FRAGMENT_BIT);
-    m_Shader = m_Renderer.createShader(m_Vert, m_Frag);
+    m_Shader = m_Renderer.createShader(vertShaderCode, fragShaderCode);
 
     LightUBO lightUBO{};
     lightUBO.lights[0].pos = glm::vec4(-1.75f, -1.75f, 0.5f, 1.0);
@@ -198,8 +195,6 @@ private:
   std::vector<Froth::VulkanUniformBuffer> m_ViewProjUbos;
   std::vector<Froth::VulkanUniformBuffer> m_LightUbos;
   Froth::VulkanSampler m_Sampler;
-  Froth::VulkanShaderModule m_Vert;
-  Froth::VulkanShaderModule m_Frag;
   Froth::Camera m_Camera;
   InputController m_InputController;
   uint32_t m_Width = 600;

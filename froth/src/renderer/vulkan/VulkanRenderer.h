@@ -35,6 +35,8 @@ public:
   virtual bool onEvent(const Event &e) override;
   bool onFramebufferResize(FramebufferResizeEvent &e);
 
+  virtual Shader createShader(const std::vector<char> &vert, const std::vector<char> &frag) override;
+
   uint32_t currentFrame() const { return m_SwapchainManager.currentFrame(); }
   virtual bool beginFrame() override;
   virtual void beginRenderPass() override;
@@ -50,8 +52,6 @@ public:
   void bindDescriptorSets(const Shader &shader, uint32_t start, const std::vector<VkDescriptorSet> &sets, const std::vector<uint32_t> &offsets) const;
   void bindVertexBuffer(const VulkanVertexBuffer &buffer) const;
   void bindIndexBuffer(const VulkanIndexBuffer &buffer) const;
-
-  Shader createShader(const VulkanShaderModule &vert, const VulkanShaderModule &frag);
 
 protected:
   /* Creates a Vulkan Renderer backend

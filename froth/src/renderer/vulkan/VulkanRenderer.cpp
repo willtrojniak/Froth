@@ -155,8 +155,10 @@ void VulkanRenderer::bindIndexBuffer(const VulkanIndexBuffer &indexBuffer) const
   vkCmdDrawIndexed(m_SwapchainManager.currentCommandBuffer(), indexBuffer.indexCount(), 1, 0, 0, 0);
 }
 
-Shader VulkanRenderer::createShader(const VulkanShaderModule &vert, const VulkanShaderModule &frag) {
-  return Shader(vert, frag, m_SwapchainManager);
+Shader VulkanRenderer::createShader(const std::vector<char> &vert, const std::vector<char> &frag) {
+  VulkanShaderModule vertModule = Froth::VulkanShaderModule(vert, VK_SHADER_STAGE_VERTEX_BIT);
+  VulkanShaderModule fragModule = Froth::VulkanShaderModule(frag, VK_SHADER_STAGE_FRAGMENT_BIT);
+  return Shader(vertModule, fragModule, m_SwapchainManager);
 }
 
 } // namespace Froth
