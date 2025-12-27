@@ -34,13 +34,18 @@ vec3 directionalLight(vec3 lightDir, vec3 lightCol, vec3 normal) {
     return diff * lightCol;
 }
 
-vec3 pointLight(vec3 lightPos, vec3 lightCol, float constant, float linear, float quadratic, vec3 normal, vec3 fragPos) {
-    vec3 lightDir = normalize(lightPos - fragPos);
+vec3 pointLight(Light light, vec3 normal, vec3 fragPos) {
+    vec3 lightDir = normalize(vec3(light.pos) - fragPos);
     float diff = max(dot(normal, lightDir), 0.0);
+    float dist = length(vec3(light.pos) - fragPos);
 
-    float dist = length(lightPos - fragPos);
+    float constant = light.params.x;
+    float linear = light.params.y;
+    float quadratic = light.params.z;
+
     float attenuation = 1 / (constant + linear * dist + (quadratic * dist * dist));
-    vec3 diffuse = lightCol * diff;
+    vec3 diffuse = vec3(light.color) * diff;
+
     diffuse *= attenuation;
 
     return diffuse;
@@ -52,7 +57,7 @@ void main() {
     result += lightAmbient;
     result += directionalLight(lightDir, lightCol, norm);
     for (int i = 0; i < MAX_LIGHTS; i++) {
-        result += pointLight(vec3(lights_ubo.lights[i].pos), vec3(lights_ubo.lights[i].color), lights_ubo.lights[i].params.x, lights_ubo.lights[i].params.y, lights_ubo.lights[i].params.z, norm, vec3(worldPos));
+        result += pointLight(lights_ubo.lights[i], norm, vec3(worldPos));
     }
     result *= vec3(fragColor) * vec3(texture(texSampler[pcs.texIndex], texCoord));
     outColor = vec4(result, 1.0);
