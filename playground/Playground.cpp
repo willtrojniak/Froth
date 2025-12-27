@@ -5,6 +5,7 @@
 #include "src/core/events/EventDispatcher.h"
 #include "src/core/events/MouseEvent.h"
 #include "src/modules/camera/Camera.h"
+#include "src/modules/light/Light.h"
 #include "src/platform/filesystem/Filesystem.h"
 #include "src/platform/keys/Keycodes.h"
 #include "src/renderer/vulkan/VulkanDescriptorPool.h"
@@ -36,6 +37,11 @@ public:
     glm::vec4 cameraPos;
   };
 
+  static const uint32_t MAX_LIGHTS = 3;
+  struct LightUBO {
+    Froth::SpotLight lights[MAX_LIGHTS];
+  };
+
   TestLayer(Froth::VulkanRenderer &renderer)
       : m_Renderer(renderer),
         m_DescriptorPool(2, 4, 8),
@@ -56,18 +62,7 @@ public:
     m_Frag = Froth::VulkanShaderModule(fragShaderCode, VK_SHADER_STAGE_FRAGMENT_BIT);
     m_Shader = m_Renderer.createShader(m_Vert, m_Frag);
 
-    // TODO: Remove
-    struct alignas(16) Light {
-      glm::vec4 pos;
-      glm::vec4 color;
-      glm::vec4 params;
-    };
-
-    const uint32_t MAX_LIGHTS = 3;
-    struct alignas(16) LightUBO {
-      Light lights[MAX_LIGHTS];
-    } lightUBO;
-
+    LightUBO lightUBO{};
     lightUBO.lights[0].pos = glm::vec4(-1.75f, -1.75f, 0.5f, 1.0);
     lightUBO.lights[0].color = glm::vec4(0.6f, 0.1f, 0.9f, 1.0);
     lightUBO.lights[0].params = glm::vec4(0.0f, 0.0f, 3.0f, 1.0);
@@ -89,20 +84,8 @@ public:
     m_LightUbos.emplace_back(sizeof(LightUBO));
     m_LightUbos.emplace_back(sizeof(LightUBO));
 
-    glm::mat4 view = m_Camera.view();
-    glm::mat4 proj = glm::perspective(glm::radians(45.0f), m_Width / (float)m_Height, 0.1f, 100.0f);
-    proj[1][1] *= -1;
-
-    ViewProjUbo vp{
-        .view = view,
-        .proj = proj,
-        .cameraPos = glm::vec4(m_Camera.pos(), 1.0f),
-    };
-
     m_LightUbos[0].write(sizeof(lightUBO), &lightUBO);
     m_LightUbos[1].write(sizeof(lightUBO), &lightUBO);
-    m_ViewProjUbos[0].write(sizeof(ViewProjUbo), &vp);
-    m_ViewProjUbos[1].write(sizeof(ViewProjUbo), &vp);
 
     // Blank Texture
     uint32_t blankImageData = 0xFFFFFFFF;
