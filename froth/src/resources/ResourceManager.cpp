@@ -36,7 +36,7 @@ std::shared_ptr<Resource> ResourceManager::getResource(ResourceHandle handle) {
   return pResource;
 }
 
-ResourceMetadata ResourceManager::getMetadata(ResourceHandle handle) {
+ResourceMetadata ResourceManager::getMetadata(ResourceHandle handle) const {
   static ResourceMetadata s_NullMetadata{};
   auto it = m_ResourceRegistry.find(handle);
   if (it == m_ResourceRegistry.end()) {

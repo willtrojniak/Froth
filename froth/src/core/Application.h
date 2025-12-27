@@ -7,6 +7,8 @@
 #include "events/Event.h"
 #include "src/platform/window/Window.h"
 #include "src/renderer/vulkan/VulkanRenderer.h"
+#include "src/resources/ResourceManager.h"
+
 #include <memory>
 
 namespace Froth {
@@ -18,6 +20,7 @@ public:
   ~Application();
   void Run();
   static Application &getInstance() { return *s_Application; }
+  ResourceManager &resourceManager() { return m_ResourceManager; }
 
   void pushLayer(std::shared_ptr<Layer> layer);
   void pushOverlay(std::shared_ptr<Layer> overlay);
@@ -34,6 +37,7 @@ private:
   static Application *s_Application;
   bool m_Running = true;
   std::unique_ptr<Window> m_Window;
+  ResourceManager m_ResourceManager;
   VulkanRenderer m_Renderer;
   LayerStack m_LayerStack;
 };

@@ -4,9 +4,10 @@
 #include "src/renderer/vulkan/VulkanPipeline.h"
 #include "src/renderer/vulkan/VulkanShaderModule.h"
 #include "src/renderer/vulkan/VulkanSwapchainManager.h"
+#include "src/resources/Resource.h"
 
 namespace Froth {
-class Shader {
+class Shader : public Resource {
 public:
   Shader() = default;
   Shader(const VulkanShaderModule &vert, const VulkanShaderModule &frag, const VulkanSwapchainManager &swapchainManager);
@@ -14,6 +15,8 @@ public:
   Shader &operator=(Shader const &) = delete;
   Shader(Shader &&) noexcept;
   Shader &operator=(Shader &&) noexcept;
+
+  virtual ResourceType type() const noexcept { return ResourceType::Shader; };
 
   const VulkanPipelineLayout &pipelineLayout() const noexcept { return m_PipelineLayout; }
   const VulkanPipeline &pipeline() const noexcept { return m_Pipeline; }

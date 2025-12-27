@@ -23,7 +23,7 @@ public:
   }
 
   std::shared_ptr<Resource> getResource(ResourceHandle handle);
-  ResourceMetadata getMetadata(ResourceHandle handle);
+  ResourceMetadata getMetadata(ResourceHandle handle) const;
   ResourceType getResourceType(ResourceHandle handle) const;
 
   bool isHandleValid(ResourceHandle handle) const;

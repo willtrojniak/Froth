@@ -15,7 +15,6 @@
 #include "src/renderer/vulkan/VulkanUniformBuffer.h"
 #include "src/renderer/vulkan/VulkanVertexBuffer.h"
 #include "src/resources/Mesh.h"
-#include "src/resources/ResourceManager.h"
 #include "src/resources/Texture2D.h"
 #include <vector>
 
@@ -47,8 +46,8 @@ public:
         m_DescriptorPool(2, 4, 8),
         m_Camera(glm::vec3(0.0f, -5.0f, 1.0f), 90.f, 0.f) {
 
-    Froth::ResourceHandle vikingMeshHandle = m_ResourceManager.importResource<Froth::Mesh>(MODEL_PATH.c_str())->handle();
-    Froth::ResourceHandle cubeMeshHandle = m_ResourceManager.importResource<Froth::Mesh>(CUBE_MODEL_PATH.c_str())->handle();
+    Froth::ResourceHandle vikingMeshHandle = Froth::Application::getInstance().resourceManager().importResource<Froth::Mesh>(MODEL_PATH.c_str())->handle();
+    Froth::ResourceHandle cubeMeshHandle = Froth::Application::getInstance().resourceManager().importResource<Froth::Mesh>(CUBE_MODEL_PATH.c_str())->handle();
 
     m_VikingObject = Object(glm::translate(glm::vec3(0.f, 0.f, 0.107647f)), vikingMeshHandle);
     m_Cubes.emplace_back(glm::translate(glm::vec3(-5.0f, -5.0f, -0.1f)) * glm::scale(glm::vec3(10.f, 10.f, 0.1f)), cubeMeshHandle);
@@ -92,7 +91,7 @@ public:
     Froth::Texture2D m_BlankTexture2D(Froth::Extent2D{.width = 1, .height = 1}, &blankImageData);
 
     // Viking Texture
-    std::shared_ptr<Froth::Texture2D> texture = m_ResourceManager.importResource<Froth::Texture2D>(TEXTURE_PATH);
+    std::shared_ptr<Froth::Texture2D> texture = Froth::Application::getInstance().resourceManager().importResource<Froth::Texture2D>(TEXTURE_PATH);
     m_Sampler = Froth::VulkanSampler::Builder().build();
 
     auto writer = Froth::VulkanDescriptorSet::Writer();
@@ -147,13 +146,13 @@ public:
 
     m_Renderer.pushConstants(m_Shader, VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(glm::mat4), sizeof(texIndex), &texIndex);
     m_Renderer.pushConstants(m_Shader, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(m_VikingObject.transform()), &m_VikingObject.transform());
-    m_Renderer.bindMesh(*m_ResourceManager.getResource<Froth::Mesh>(m_VikingObject.meshHandle()));
+    m_Renderer.bindMesh(*Froth::Application::getInstance().resourceManager().getResource<Froth::Mesh>(m_VikingObject.meshHandle()));
 
     texIndex = 0;
     m_Renderer.pushConstants(m_Shader, VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(glm::mat4), sizeof(texIndex), &texIndex);
     for (Object &cube : m_Cubes) {
       m_Renderer.pushConstants(m_Shader, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(cube.transform()), &cube.transform());
-      m_Renderer.bindMesh(*m_ResourceManager.getResource<Froth::Mesh>(cube.meshHandle()));
+      m_Renderer.bindMesh(*Froth::Application::getInstance().resourceManager().getResource<Froth::Mesh>(cube.meshHandle()));
     }
   }
 
@@ -192,7 +191,6 @@ private:
   Froth::VulkanRenderer &m_Renderer;
   Object m_VikingObject;
   std::vector<Object> m_Cubes;
-  Froth::ResourceManager m_ResourceManager;
   Froth::Shader m_Shader;
   Froth::Texture2D m_BlankTexture2D;
   Froth::VulkanDescriptorPool m_DescriptorPool;
