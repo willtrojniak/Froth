@@ -80,6 +80,22 @@ void VulkanRenderer::beginRenderPass() {
   renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
   renderPassInfo.pClearValues = clearValues.data();
   vkCmdBeginRenderPass(m_SwapchainManager.currentCommandBuffer(), &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+  // Viewport
+  VkViewport viewport{};
+  viewport.x = 0.0f;
+  viewport.y = 0.0f;
+  viewport.width = m_SwapchainManager.swapchain().extent().width;
+  viewport.height = m_SwapchainManager.swapchain().extent().height;
+  viewport.minDepth = 0.0f;
+  viewport.maxDepth = 1.0f;
+  vkCmdSetViewport(m_SwapchainManager.currentCommandBuffer(), 0, 1, &viewport);
+
+  // Scissor
+  VkRect2D scissor{};
+  scissor.offset = {0, 0};
+  scissor.extent = m_SwapchainManager.swapchain().extent();
+  vkCmdSetScissor(m_SwapchainManager.currentCommandBuffer(), 0, 1, &scissor);
 }
 
 void VulkanRenderer::endRenderPass() {
@@ -97,23 +113,6 @@ void VulkanRenderer::pushConstants(const Shader &shader, VkShaderStageFlags stag
 void VulkanRenderer::bindShader(const Shader &shader) const {
   // Bind pipeline
   vkCmdBindPipeline(m_SwapchainManager.currentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, shader.pipeline());
-
-  // TODO: Should this move elsewhere?
-  // Viewport
-  VkViewport viewport{};
-  viewport.x = 0.0f;
-  viewport.y = 0.0f;
-  viewport.width = m_SwapchainManager.swapchain().extent().width;
-  viewport.height = m_SwapchainManager.swapchain().extent().height;
-  viewport.minDepth = 0.0f;
-  viewport.maxDepth = 1.0f;
-  vkCmdSetViewport(m_SwapchainManager.currentCommandBuffer(), 0, 1, &viewport);
-
-  // Scissor
-  VkRect2D scissor{};
-  scissor.offset = {0, 0};
-  scissor.extent = m_SwapchainManager.swapchain().extent();
-  vkCmdSetScissor(m_SwapchainManager.currentCommandBuffer(), 0, 1, &scissor);
 }
 
 void VulkanRenderer::bindDescriptorSets(const Shader &shader, uint32_t start, const std::vector<VkDescriptorSet> &sets) const {
