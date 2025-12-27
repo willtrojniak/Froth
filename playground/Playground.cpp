@@ -160,9 +160,12 @@ public:
   }
 
   bool onMouseMove(const Froth::MouseMoveEvent &e) {
-    m_Camera.rotate((m_CursorX - e.x()) / 10, (m_CursorY - e.y()) / 10);
+    if (movedMouse) {
+      m_Camera.rotate((m_CursorX - e.x()) / 10, (m_CursorY - e.y()) / 10);
+    }
     m_CursorX = e.x();
     m_CursorY = e.y();
+    movedMouse = true;
 
     return false;
   }
@@ -196,6 +199,7 @@ private:
   Froth::Camera m_Camera;
   uint32_t m_Width = 600;
   uint32_t m_Height = 400;
+  bool movedMouse = false;
   double m_CursorX;
   double m_CursorY;
 };
