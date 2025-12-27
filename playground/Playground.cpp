@@ -1,4 +1,3 @@
-#include "InputController.h"
 #include "glm/ext/vector_float3.hpp"
 #include "src/core/Entrypoint.h"
 
@@ -104,22 +103,23 @@ public:
 
   void onUpdate(double ts) override {
     const float moveSpeed = 2.f;
-    if (m_InputController.isPressed(Froth::Key::W)) {
+    const InputController &inputController = Froth::Application::getInstance().inputController();
+    if (inputController.isPressed(Froth::Key::W)) {
       m_Camera.moveForward(ts * moveSpeed);
     }
-    if (m_InputController.isPressed(Froth::Key::S)) {
+    if (inputController.isPressed(Froth::Key::S)) {
       m_Camera.moveForward(ts * -moveSpeed);
     }
-    if (m_InputController.isPressed(Froth::Key::A)) {
+    if (inputController.isPressed(Froth::Key::A)) {
       m_Camera.strafe(ts * -moveSpeed);
     }
-    if (m_InputController.isPressed(Froth::Key::D)) {
+    if (inputController.isPressed(Froth::Key::D)) {
       m_Camera.strafe(ts * moveSpeed);
     }
-    if (m_InputController.isPressed(Froth::Key::Q)) {
+    if (inputController.isPressed(Froth::Key::Q)) {
       m_Camera.moveUp(ts * -moveSpeed);
     }
-    if (m_InputController.isPressed(Froth::Key::E)) {
+    if (inputController.isPressed(Froth::Key::E)) {
       m_Camera.moveUp(ts * moveSpeed);
     }
   }
@@ -172,8 +172,6 @@ public:
     d.dispatch<Froth::WindowResizeEvent>(std::bind(&TestLayer::onWindowResize, this, std::placeholders::_1));
     d.dispatch<Froth::MouseMoveEvent>(std::bind(&TestLayer::onMouseMove, this, std::placeholders::_1));
 
-    m_InputController.onEvent(e);
-
     return d.isHandled();
   }
 
@@ -196,7 +194,6 @@ private:
   std::vector<Froth::VulkanUniformBuffer> m_LightUbos;
   Froth::VulkanSampler m_Sampler;
   Froth::Camera m_Camera;
-  InputController m_InputController;
   uint32_t m_Width = 600;
   uint32_t m_Height = 400;
   double m_CursorX;

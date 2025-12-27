@@ -76,6 +76,8 @@ void Application::onEvent(const Event &e) {
     if (layer->onEvent(e))
       return;
   }
+  if (m_InputController.onEvent(e))
+    return;
 
   EventDispatcher dispatcher = EventDispatcher(e);
   dispatcher.dispatch<WindowCloseEvent>(BIND_FUNC(onWindowClose));
