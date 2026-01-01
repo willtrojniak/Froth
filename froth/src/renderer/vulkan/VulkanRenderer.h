@@ -35,7 +35,7 @@ public:
   virtual bool onEvent(const Event &e) override;
   bool onFramebufferResize(FramebufferResizeEvent &e);
 
-  virtual Shader createShader(const std::vector<char> &vert, const std::vector<char> &frag) override;
+  virtual Shader createShader(const Material &mat) override;
 
   uint32_t currentFrame() const { return m_SwapchainManager.currentFrame(); }
   virtual bool beginFrame() override;

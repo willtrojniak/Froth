@@ -10,7 +10,7 @@ class VulkanShaderModule {
 
 public:
   VulkanShaderModule() = default;
-  VulkanShaderModule(const std::vector<char> &code, VkShaderStageFlagBits stage);
+  VulkanShaderModule(const std::vector<char> &code);
   VulkanShaderModule(VulkanShaderModule const &) = delete;
   VulkanShaderModule &operator=(VulkanShaderModule const &) = delete;
   VulkanShaderModule &operator=(VulkanShaderModule &&) noexcept;
@@ -18,12 +18,11 @@ public:
 
   operator VkShaderModule() const { return m_ShaderModule; }
 
-  VkPipelineShaderStageCreateInfo pipelineStageInfo() const;
+  VkPipelineShaderStageCreateInfo pipelineStageInfo(VkShaderStageFlagBits stage) const;
   void cleanup();
 
 private:
   VkShaderModule m_ShaderModule = nullptr;
-  VkShaderStageFlagBits m_Stage;
 };
 
 } // namespace Froth

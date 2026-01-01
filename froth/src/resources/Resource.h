@@ -11,7 +11,7 @@ using ResourceHandle = UUID;
 enum class ResourceType : uint16_t {
   None = 0,
   Mesh,
-  Shader,
+  ShaderModule,
   Texture2D,
 };
 

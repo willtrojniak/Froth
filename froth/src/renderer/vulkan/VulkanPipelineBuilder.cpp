@@ -87,7 +87,7 @@ VulkanPipeline VulkanPipelineBuilder::build(const VulkanRenderPass &renderPass, 
 }
 
 VulkanPipelineBuilder &VulkanPipelineBuilder::setShaders(const VulkanShaderModule &vertexShader, const VulkanShaderModule &fragmentShader) {
-  m_ShaderStages = {vertexShader.pipelineStageInfo(), fragmentShader.pipelineStageInfo()};
+  m_ShaderStages = {vertexShader.pipelineStageInfo(VK_SHADER_STAGE_VERTEX_BIT), fragmentShader.pipelineStageInfo(VK_SHADER_STAGE_FRAGMENT_BIT)};
 
   return *this;
 }

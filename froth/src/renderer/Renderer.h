@@ -15,7 +15,7 @@ public:
 
   virtual bool onEvent(const Event &e) = 0;
 
-  virtual Shader createShader(const std::vector<char> &vert, const std::vector<char> &frag) = 0;
+  virtual Shader createShader(const Material &mat) = 0;
 
   virtual bool beginFrame() = 0;
   virtual void beginRenderPass() = 0;

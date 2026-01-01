@@ -5,7 +5,6 @@
 #include "src/core/events/MouseEvent.h"
 #include "src/modules/camera/Camera.h"
 #include "src/modules/light/Light.h"
-#include "src/platform/filesystem/Filesystem.h"
 #include "src/platform/keys/Keycodes.h"
 #include "src/renderer/vulkan/VulkanDescriptorPool.h"
 #include "src/renderer/vulkan/VulkanDescriptorSet.h"
@@ -13,7 +12,9 @@
 #include "src/renderer/vulkan/VulkanIndexBuffer.h"
 #include "src/renderer/vulkan/VulkanUniformBuffer.h"
 #include "src/renderer/vulkan/VulkanVertexBuffer.h"
+#include "src/resources/Material.h"
 #include "src/resources/Mesh.h"
+#include "src/resources/ShaderModule.h"
 #include "src/resources/Texture2D.h"
 #include <vector>
 
@@ -53,9 +54,13 @@ public:
     m_Cubes.emplace_back(glm::translate(glm::vec3(2.f, 1.f, -0.01f)), cubeMeshHandle);
     m_Cubes.emplace_back(glm::translate(glm::vec3(-2.f, -2.f, -0.01f)) * glm::scale(glm::vec3(0.5f, 0.5f, 0.5f)), cubeMeshHandle);
 
-    std::vector<char> vertShaderCode = Froth::Filesystem::readFile("../playground/shaders/vert.spv");
-    std::vector<char> fragShaderCode = Froth::Filesystem::readFile("../playground/shaders/frag.spv");
-    m_Shader = m_Renderer.createShader(vertShaderCode, fragShaderCode);
+    Froth::ResourceHandle vertShaderModule = Froth::Application::getInstance().resourceManager().importResource<Froth::ShaderModule>("../playground/shaders/vert.spv")->handle();
+    Froth::ResourceHandle fragShaderModule = Froth::Application::getInstance().resourceManager().importResource<Froth::ShaderModule>("../playground/shaders/frag.spv")->handle();
+
+    // TODO: Eventually materials will be parsed from files
+    Froth::Material mat = Froth::Material(vertShaderModule, fragShaderModule);
+
+    m_Shader = m_Renderer.createShader(mat);
 
     LightUBO lightUBO{};
     lightUBO.lights[0].pos = glm::vec4(-1.75f, -1.75f, 0.5f, 1.0);

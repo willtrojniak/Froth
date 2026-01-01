@@ -1,11 +1,16 @@
 #include "Shader.h"
+#include "src/core/Application.h"
 #include "src/core/logger/Logger.h"
 #include "src/renderer/vulkan/VulkanPipelineBuilder.h"
 #include "src/renderer/vulkan/VulkanVertex.h"
+#include "src/resources/ShaderModule.h"
 
 namespace Froth {
 
-Shader::Shader(const VulkanShaderModule &vert, const VulkanShaderModule &frag, const VulkanSwapchainManager &swapchainManager) {
+Shader::Shader(const Material &material, const VulkanSwapchainManager &swapchainManager) {
+  auto vertexShader = Application::getInstance().resourceManager().getResource<ShaderModule>(material.vertexShaderHandle());
+  auto fragmentShader = Application::getInstance().resourceManager().getResource<ShaderModule>(material.fragmentShaderHandle());
+
   // TODO: Customizable descriptor set layout - consider reading from shaders?
   VkDescriptorSetLayoutBinding uboLayoutBinding{};
   uboLayoutBinding.binding = 0;
@@ -46,7 +51,7 @@ Shader::Shader(const VulkanShaderModule &vert, const VulkanShaderModule &frag, c
   scissor.extent = swapchainManager.swapchain().extent();
   m_Pipeline = VulkanPipelineBuilder()
                    .setVertexInput(Vertex::getInputDescription().getInfo())
-                   .setShaders(vert, frag)
+                   .setShaders(vertexShader->module(), fragmentShader->module())
                    .setViewport(viewport, scissor)
                    .build(swapchainManager.renderpass(), m_PipelineLayout);
 

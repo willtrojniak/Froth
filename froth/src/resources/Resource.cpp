@@ -8,8 +8,8 @@ std::string_view Resource::ResourceTypeToString(ResourceType type) {
     return "ResourceType::None";
   case ResourceType::Mesh:
     return "ResourceType::Mesh";
-  case ResourceType::Shader:
-    return "ResourceType::Shader";
+  case ResourceType::ShaderModule:
+    return "ResourceType::ShaderModule";
   case ResourceType::Texture2D:
     return "ResourceType::Texture2D";
   default:

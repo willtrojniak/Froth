@@ -1,5 +1,6 @@
 #include "ResourceImporter.h"
 #include "MeshImporter.h"
+#include "ShaderModuleImporter.h"
 #include "TextureImporter.h"
 #include "src/core/logger/Logger.h"
 
@@ -9,6 +10,8 @@ std::shared_ptr<Resource> ResourceImporter::ImportResource(const ResourceMetadat
   switch (metadata.Type) {
   case ResourceType::Mesh:
     return MeshImporter::ImportMesh(metadata);
+  case ResourceType::ShaderModule:
+    return ShaderModuleImporter::ImportShaderModule(metadata);
   case ResourceType::Texture2D:
     return TextureImporter::ImportTexture2D(metadata);
   case ResourceType::None:

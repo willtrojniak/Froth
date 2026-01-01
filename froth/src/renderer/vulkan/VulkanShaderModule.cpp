@@ -6,8 +6,7 @@
 
 namespace Froth {
 
-VulkanShaderModule::VulkanShaderModule(const std::vector<char> &code, VkShaderStageFlagBits stage)
-    : m_Stage(stage) {
+VulkanShaderModule::VulkanShaderModule(const std::vector<char> &code) {
   VkShaderModuleCreateInfo createInfo{};
   createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
   createInfo.codeSize = code.size();
@@ -21,18 +20,17 @@ VulkanShaderModule::VulkanShaderModule(const std::vector<char> &code, VkShaderSt
 
 VulkanShaderModule &VulkanShaderModule::operator=(VulkanShaderModule &&o) noexcept {
   m_ShaderModule = o.m_ShaderModule;
-  m_Stage = o.m_Stage;
 
   o.m_ShaderModule = nullptr;
   return *this;
 }
 
-VkPipelineShaderStageCreateInfo VulkanShaderModule::pipelineStageInfo() const {
+VkPipelineShaderStageCreateInfo VulkanShaderModule::pipelineStageInfo(VkShaderStageFlagBits stage) const {
   VkPipelineShaderStageCreateInfo createInfo{};
   createInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-  createInfo.stage = m_Stage;
+  createInfo.stage = stage;
   createInfo.module = m_ShaderModule;
-  createInfo.pName = "main";
+  createInfo.pName = "main"; // TODO: Customizable?
 
   return createInfo;
 }
