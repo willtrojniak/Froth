@@ -9,11 +9,11 @@
 #include "src/renderer/vulkan/VulkanDevice.h"
 #include "src/renderer/vulkan/VulkanImage.h"
 #include "src/renderer/vulkan/VulkanIndexBuffer.h"
+#include "src/renderer/vulkan/VulkanShaderPipelineManager.h"
 #include "src/renderer/vulkan/VulkanSurface.h"
 #include "src/renderer/vulkan/VulkanSwapchainManager.h"
 #include "src/renderer/vulkan/VulkanVertexBuffer.h"
 #include "src/resources/Mesh.h"
-#include "src/resources/Shader.h"
 #include <memory>
 #include <vector>
 
@@ -35,7 +35,7 @@ public:
   virtual bool onEvent(const Event &e) override;
   bool onFramebufferResize(FramebufferResizeEvent &e);
 
-  virtual Shader createShader(const Material &mat) override;
+  void registerMaterial(const Material &mat);
 
   uint32_t currentFrame() const { return m_SwapchainManager.currentFrame(); }
   virtual bool beginFrame() override;
@@ -45,13 +45,13 @@ public:
 
   VulkanCommandPool &getGraphicsCommandPool() { return m_GraphicsCommandPool; };
 
-  void bindShader(const Shader &shader) const;
-  void bindMesh(const Mesh &mesh) const;
-  void pushConstants(const Shader &shader, VkShaderStageFlags stage, uint32_t offset, uint32_t size, const void *pData) const;
-  void bindDescriptorSets(const Shader &shader, uint32_t start, const std::vector<VkDescriptorSet> &sets) const;
-  void bindDescriptorSets(const Shader &shader, uint32_t start, const std::vector<VkDescriptorSet> &sets, const std::vector<uint32_t> &offsets) const;
-  void bindVertexBuffer(const VulkanVertexBuffer &buffer) const;
-  void bindIndexBuffer(const VulkanIndexBuffer &buffer) const;
+  void bindMaterial(const Material &mat);
+  void bindMesh(const Mesh &mesh);
+  void pushConstants(const Material &mat, VkShaderStageFlags stage, uint32_t offset, uint32_t size, const void *pData);
+  void bindDescriptorSets(const Material &mat, uint32_t start, const std::vector<VkDescriptorSet> &sets);
+  void bindDescriptorSets(const Material &mat, uint32_t start, const std::vector<VkDescriptorSet> &sets, const std::vector<uint32_t> &offsets);
+  void bindVertexBuffer(const VulkanVertexBuffer &buffer);
+  void bindIndexBuffer(const VulkanIndexBuffer &buffer);
 
 protected:
   /* Creates a Vulkan Renderer backend
@@ -65,5 +65,6 @@ protected:
 private:
   VulkanCommandPool m_GraphicsCommandPool;
   VulkanSwapchainManager m_SwapchainManager;
+  VulkanShaderPipelineManager m_ShaderManager;
 };
 } // namespace Froth

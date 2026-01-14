@@ -61,6 +61,10 @@ bool VulkanRenderer::onFramebufferResize(FramebufferResizeEvent &e) {
   return false;
 }
 
+void VulkanRenderer::registerMaterial(const Material &mat) {
+  m_ShaderManager.registerMaterial(mat, m_SwapchainManager);
+}
+
 bool VulkanRenderer::beginFrame() {
   return m_SwapchainManager.beginFrame();
 }
@@ -106,16 +110,22 @@ void VulkanRenderer::endFrame() {
   m_SwapchainManager.endFrame();
 }
 
-void VulkanRenderer::pushConstants(const Shader &shader, VkShaderStageFlags stage, uint32_t offset, uint32_t size, const void *pData) const {
+void VulkanRenderer::pushConstants(const Material &mat, VkShaderStageFlags stage, uint32_t offset, uint32_t size, const void *pData) {
+  const VulkanShaderPipeline &shader = m_ShaderManager.getShader(mat, m_SwapchainManager);
+
   vkCmdPushConstants(m_SwapchainManager.currentCommandBuffer(), shader.pipelineLayout(), stage, offset, size, pData);
 }
 
-void VulkanRenderer::bindShader(const Shader &shader) const {
+void VulkanRenderer::bindMaterial(const Material &mat) {
+  const VulkanShaderPipeline &shader = m_ShaderManager.getShader(mat, m_SwapchainManager);
+
   // Bind pipeline
   vkCmdBindPipeline(m_SwapchainManager.currentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, shader.pipeline());
 }
 
-void VulkanRenderer::bindDescriptorSets(const Shader &shader, uint32_t start, const std::vector<VkDescriptorSet> &sets) const {
+void VulkanRenderer::bindDescriptorSets(const Material &mat, uint32_t start, const std::vector<VkDescriptorSet> &sets) {
+  const VulkanShaderPipeline &shader = m_ShaderManager.getShader(mat, m_SwapchainManager);
+
   vkCmdBindDescriptorSets(m_SwapchainManager.currentCommandBuffer(),
                           VK_PIPELINE_BIND_POINT_GRAPHICS,
                           shader.pipelineLayout(),
@@ -124,7 +134,9 @@ void VulkanRenderer::bindDescriptorSets(const Shader &shader, uint32_t start, co
                           0, VK_NULL_HANDLE);
 }
 
-void VulkanRenderer::bindDescriptorSets(const Shader &shader, uint32_t start, const std::vector<VkDescriptorSet> &sets, const std::vector<uint32_t> &offsets) const {
+void VulkanRenderer::bindDescriptorSets(const Material &mat, uint32_t start, const std::vector<VkDescriptorSet> &sets, const std::vector<uint32_t> &offsets) {
+  const VulkanShaderPipeline &shader = m_ShaderManager.getShader(mat, m_SwapchainManager);
+
   // FIXME: Validate that dynamic offsets are the right size
   vkCmdBindDescriptorSets(m_SwapchainManager.currentCommandBuffer(),
                           VK_PIPELINE_BIND_POINT_GRAPHICS,
@@ -134,28 +146,24 @@ void VulkanRenderer::bindDescriptorSets(const Shader &shader, uint32_t start, co
                           offsets.size(), offsets.data());
 }
 
-void VulkanRenderer::bindMesh(const Mesh &mesh) const {
+void VulkanRenderer::bindMesh(const Mesh &mesh) {
   bindVertexBuffer(mesh.vertexBuffer());
   bindIndexBuffer(mesh.indexBuffer());
 }
 
-void VulkanRenderer::bindVertexBuffer(const VulkanVertexBuffer &vertexBuffer) const {
+void VulkanRenderer::bindVertexBuffer(const VulkanVertexBuffer &vertexBuffer) {
   // TODO: Handle dynamic offsets
   VkDeviceSize offsets[] = {0};
   VkBuffer vertexBuffers[] = {vertexBuffer};
   vkCmdBindVertexBuffers(m_SwapchainManager.currentCommandBuffer(), 0, 1, vertexBuffers, offsets);
 }
 
-void VulkanRenderer::bindIndexBuffer(const VulkanIndexBuffer &indexBuffer) const {
+void VulkanRenderer::bindIndexBuffer(const VulkanIndexBuffer &indexBuffer) {
   // TODO: Handle offsets
   vkCmdBindIndexBuffer(m_SwapchainManager.currentCommandBuffer(), indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
   // PERF: Seperate into another call?
   vkCmdDrawIndexed(m_SwapchainManager.currentCommandBuffer(), indexBuffer.indexCount(), 1, 0, 0, 0);
-}
-
-Shader VulkanRenderer::createShader(const Material &mat) {
-  return Shader(mat, m_SwapchainManager);
 }
 
 } // namespace Froth

@@ -58,9 +58,8 @@ public:
     Froth::ResourceHandle fragShaderModule = Froth::Application::getInstance().resourceManager().importResource<Froth::ShaderModule>("../playground/shaders/frag.spv")->handle();
 
     // TODO: Eventually materials will be parsed from files
-    Froth::Material mat = Froth::Material(vertShaderModule, fragShaderModule);
-
-    m_Shader = m_Renderer.createShader(mat);
+    m_Material = Froth::Material(vertShaderModule, fragShaderModule);
+    m_Renderer.registerMaterial(m_Material);
 
     LightUBO lightUBO{};
     lightUBO.lights[0].pos = glm::vec4(-1.75f, -1.75f, 0.5f, 1.0);
@@ -75,7 +74,8 @@ public:
     lightUBO.lights[2].color = glm::vec4(0.8f, 0.3f, 0.1f, 1.0);
     lightUBO.lights[2].params = glm::vec4(0.0f, 0.0f, 0.3f, 1.0);
 
-    m_DescriptorSets = m_DescriptorPool.allocateDescriptorSets(std::vector<VkDescriptorSetLayout>(2, m_Shader.descriptorSets()[0]));
+    m_DescriptorSets = m_DescriptorPool.allocateDescriptorSets(std::vector<VkDescriptorSetLayout>(2, m_Material.descriptorSetLayouts()[0]));
+
     m_ViewProjUbos.reserve(2);
     m_ViewProjUbos.emplace_back(sizeof(ViewProjUbo));
     m_ViewProjUbos.emplace_back(sizeof(ViewProjUbo));
@@ -143,17 +143,17 @@ public:
     m_ViewProjUbos[frame].write(sizeof(ViewProjUbo), &vp);
 
     uint32_t texIndex = 1;
-    m_Renderer.bindShader(m_Shader);
-    m_Renderer.bindDescriptorSets(m_Shader, 0, std::vector{m_DescriptorSets[frame]});
+    m_Renderer.bindMaterial(m_Material);
+    m_Renderer.bindDescriptorSets(m_Material, 0, std::vector{m_DescriptorSets[frame]});
 
-    m_Renderer.pushConstants(m_Shader, VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(glm::mat4), sizeof(texIndex), &texIndex);
-    m_Renderer.pushConstants(m_Shader, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(m_VikingObject.transform()), &m_VikingObject.transform());
+    m_Renderer.pushConstants(m_Material, VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(glm::mat4), sizeof(texIndex), &texIndex);
+    m_Renderer.pushConstants(m_Material, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(m_VikingObject.transform()), &m_VikingObject.transform());
     m_Renderer.bindMesh(*Froth::Application::getInstance().resourceManager().getResource<Froth::Mesh>(m_VikingObject.meshHandle()));
 
     texIndex = 0;
-    m_Renderer.pushConstants(m_Shader, VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(glm::mat4), sizeof(texIndex), &texIndex);
+    m_Renderer.pushConstants(m_Material, VK_SHADER_STAGE_FRAGMENT_BIT, sizeof(glm::mat4), sizeof(texIndex), &texIndex);
     for (Object &cube : m_Cubes) {
-      m_Renderer.pushConstants(m_Shader, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(cube.transform()), &cube.transform());
+      m_Renderer.pushConstants(m_Material, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(cube.transform()), &cube.transform());
       m_Renderer.bindMesh(*Froth::Application::getInstance().resourceManager().getResource<Froth::Mesh>(cube.meshHandle()));
     }
   }
@@ -165,12 +165,12 @@ public:
   }
 
   bool onMouseMove(const Froth::MouseMoveEvent &e) {
-    if (movedMouse) {
+    if (m_MovedMouse) {
       m_Camera.rotate((m_CursorX - e.x()) / 10, (m_CursorY - e.y()) / 10);
     }
     m_CursorX = e.x();
     m_CursorY = e.y();
-    movedMouse = true;
+    m_MovedMouse = true;
 
     return false;
   }
@@ -194,7 +194,7 @@ private:
   Froth::VulkanRenderer &m_Renderer;
   Object m_VikingObject;
   std::vector<Object> m_Cubes;
-  Froth::Shader m_Shader;
+  Froth::Material m_Material;
   Froth::Texture2D m_BlankTexture2D;
   Froth::VulkanDescriptorPool m_DescriptorPool;
   std::vector<VkDescriptorSet> m_DescriptorSets;
@@ -204,7 +204,7 @@ private:
   Froth::Camera m_Camera;
   uint32_t m_Width = 600;
   uint32_t m_Height = 400;
-  bool movedMouse = false;
+  bool m_MovedMouse = false;
   double m_CursorX;
   double m_CursorY;
 };
