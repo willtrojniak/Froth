@@ -46,11 +46,9 @@ target_include_directories(${PROJECT_NAME} PUBLIC
 add_subdirectory(dependencies/vendor/glm)
 add_subdirectory(dependencies/vendor/glfw)
 
-set(SHADERC_SKIP_INSTALL ON CACHE BOOL "" FORCE)
 set(SHADERC_SKIP_TESTS ON CACHE BOOL "" FORCE)
 set(SHADERC_SKIP_EXAMPLES ON CACHE BOOL "" FORCE)
 set(SHADERC_SKIP_EXECUTABLES ON CACHE BOOL "" FORCE)
-set(ENABLE_OPT OFF CACHE BOOL "Disable SPIRV-Tools optimizations" FORCE)
 add_subdirectory(dependencies/vendor/shaderc)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC glm)
