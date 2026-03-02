@@ -14,7 +14,7 @@
 #include "src/renderer/vulkan/VulkanVertexBuffer.h"
 #include "src/resources/Material.h"
 #include "src/resources/Mesh.h"
-#include "src/resources/ShaderModule.h"
+#include "src/resources/ShaderSource.h"
 #include "src/resources/Texture2D.h"
 #include <vector>
 
@@ -54,8 +54,8 @@ public:
     m_Cubes.emplace_back(glm::translate(glm::vec3(2.f, 1.f, -0.01f)), cubeMeshHandle);
     m_Cubes.emplace_back(glm::translate(glm::vec3(-2.f, -2.f, -0.01f)) * glm::scale(glm::vec3(0.5f, 0.5f, 0.5f)), cubeMeshHandle);
 
-    Froth::ResourceHandle vertShaderModule = Froth::Application::getInstance().resourceManager().importResource<Froth::ShaderModule>("../playground/shaders/vert.spv")->handle();
-    Froth::ResourceHandle fragShaderModule = Froth::Application::getInstance().resourceManager().importResource<Froth::ShaderModule>("../playground/shaders/frag.spv")->handle();
+    Froth::ResourceHandle vertShaderModule = Froth::Application::getInstance().resourceManager().importResource<Froth::ShaderSource>("../playground/shaders/vert.spv")->handle();
+    Froth::ResourceHandle fragShaderModule = Froth::Application::getInstance().resourceManager().importResource<Froth::ShaderSource>("../playground/shaders/frag.spv")->handle();
 
     // TODO: Eventually materials will be parsed from files
     m_Material = Froth::Material(vertShaderModule, fragShaderModule);

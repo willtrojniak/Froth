@@ -9,6 +9,7 @@
 #include "src/renderer/vulkan/VulkanDevice.h"
 #include "src/renderer/vulkan/VulkanImage.h"
 #include "src/renderer/vulkan/VulkanIndexBuffer.h"
+#include "src/renderer/vulkan/VulkanShaderModuleManager.h"
 #include "src/renderer/vulkan/VulkanShaderPipelineManager.h"
 #include "src/renderer/vulkan/VulkanSurface.h"
 #include "src/renderer/vulkan/VulkanSwapchainManager.h"
@@ -65,6 +66,7 @@ protected:
 private:
   VulkanCommandPool m_GraphicsCommandPool;
   VulkanSwapchainManager m_SwapchainManager;
-  VulkanShaderPipelineManager m_ShaderManager;
+  VulkanShaderPipelineManager m_PipelineManager;
+  VulkanShaderModuleManager m_ShaderModuleManager;
 };
 } // namespace Froth

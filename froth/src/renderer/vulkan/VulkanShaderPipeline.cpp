@@ -1,18 +1,17 @@
 #include "src/renderer/vulkan/VulkanShaderPipeline.h"
-#include "src/core/Application.h"
 #include "src/core/logger/Logger.h"
 #include "src/renderer/vulkan/VulkanPipelineBuilder.h"
 #include "src/renderer/vulkan/VulkanVertex.h"
-#include "src/resources/ShaderModule.h"
 
 namespace Froth {
 
-VulkanShaderPipeline::VulkanShaderPipeline(const Material &mat, const VulkanSwapchainManager &swapchainManager) {
-  auto vertexShader = Application::getInstance().resourceManager().getResource<ShaderModule>(mat.vertexShaderHandle());
-  auto fragmentShader = Application::getInstance().resourceManager().getResource<ShaderModule>(mat.fragmentShaderHandle());
+VulkanShaderPipeline::VulkanShaderPipeline(const VulkanShaderModule &vertexShader,
+                                           const VulkanShaderModule &fragmentShader,
+                                           const std::vector<VulkanDescriptorSetLayout> &descriptorSets,
+                                           const VulkanSwapchainManager &swapchainManager) {
 
   // TODO: Bring out push constants to make configurable
-  m_PipelineLayout = VulkanPipelineLayout(mat.descriptorSetLayouts());
+  m_PipelineLayout = VulkanPipelineLayout(descriptorSets);
 
   VkViewport viewport{};
   viewport.x = 0.0f;
@@ -27,7 +26,7 @@ VulkanShaderPipeline::VulkanShaderPipeline(const Material &mat, const VulkanSwap
   scissor.extent = swapchainManager.swapchain().extent();
   m_Pipeline = VulkanPipelineBuilder()
                    .setVertexInput(Vertex::getInputDescription().getInfo())
-                   .setShaders(vertexShader->module(), fragmentShader->module())
+                   .setShaders(vertexShader, fragmentShader)
                    .setViewport(viewport, scissor)
                    .build(swapchainManager.renderpass(), m_PipelineLayout);
 

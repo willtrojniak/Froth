@@ -4,6 +4,7 @@
 #include "VulkanVertexBuffer.h"
 #include "src/core/events/ApplicationEvent.h"
 #include "src/core/events/EventDispatcher.h"
+#include "src/core/logger/Logger.h"
 #include "src/renderer/vulkan/VulkanContext.h"
 #include "src/renderer/vulkan/VulkanImage.h"
 #include <cstdint>
@@ -62,7 +63,8 @@ bool VulkanRenderer::onFramebufferResize(FramebufferResizeEvent &e) {
 }
 
 void VulkanRenderer::registerMaterial(const Material &mat) {
-  m_ShaderManager.registerMaterial(mat, m_SwapchainManager);
+  m_PipelineManager.getOrCreatePipeline(m_ShaderModuleManager, mat, m_SwapchainManager);
+  FROTH_DEBUG("VulkanRenderer: Registered Material");
 }
 
 bool VulkanRenderer::beginFrame() {
@@ -111,36 +113,36 @@ void VulkanRenderer::endFrame() {
 }
 
 void VulkanRenderer::pushConstants(const Material &mat, VkShaderStageFlags stage, uint32_t offset, uint32_t size, const void *pData) {
-  const VulkanShaderPipeline &shader = m_ShaderManager.getShader(mat, m_SwapchainManager);
+  const VulkanShaderPipeline &pipeline = m_PipelineManager.getOrCreatePipeline(m_ShaderModuleManager, mat, m_SwapchainManager);
 
-  vkCmdPushConstants(m_SwapchainManager.currentCommandBuffer(), shader.pipelineLayout(), stage, offset, size, pData);
+  vkCmdPushConstants(m_SwapchainManager.currentCommandBuffer(), pipeline.pipelineLayout(), stage, offset, size, pData);
 }
 
 void VulkanRenderer::bindMaterial(const Material &mat) {
-  const VulkanShaderPipeline &shader = m_ShaderManager.getShader(mat, m_SwapchainManager);
+  const VulkanShaderPipeline &pipeline = m_PipelineManager.getOrCreatePipeline(m_ShaderModuleManager, mat, m_SwapchainManager);
 
   // Bind pipeline
-  vkCmdBindPipeline(m_SwapchainManager.currentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, shader.pipeline());
+  vkCmdBindPipeline(m_SwapchainManager.currentCommandBuffer(), VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.pipeline());
 }
 
 void VulkanRenderer::bindDescriptorSets(const Material &mat, uint32_t start, const std::vector<VkDescriptorSet> &sets) {
-  const VulkanShaderPipeline &shader = m_ShaderManager.getShader(mat, m_SwapchainManager);
+  const VulkanShaderPipeline &pipeline = m_PipelineManager.getOrCreatePipeline(m_ShaderModuleManager, mat, m_SwapchainManager);
 
   vkCmdBindDescriptorSets(m_SwapchainManager.currentCommandBuffer(),
                           VK_PIPELINE_BIND_POINT_GRAPHICS,
-                          shader.pipelineLayout(),
+                          pipeline.pipelineLayout(),
                           start, sets.size(),
                           sets.data(),
                           0, VK_NULL_HANDLE);
 }
 
 void VulkanRenderer::bindDescriptorSets(const Material &mat, uint32_t start, const std::vector<VkDescriptorSet> &sets, const std::vector<uint32_t> &offsets) {
-  const VulkanShaderPipeline &shader = m_ShaderManager.getShader(mat, m_SwapchainManager);
+  const VulkanShaderPipeline &pipeline = m_PipelineManager.getOrCreatePipeline(m_ShaderModuleManager, mat, m_SwapchainManager);
 
   // FIXME: Validate that dynamic offsets are the right size
   vkCmdBindDescriptorSets(m_SwapchainManager.currentCommandBuffer(),
                           VK_PIPELINE_BIND_POINT_GRAPHICS,
-                          shader.pipelineLayout(),
+                          pipeline.pipelineLayout(),
                           start, sets.size(),
                           sets.data(),
                           offsets.size(), offsets.data());

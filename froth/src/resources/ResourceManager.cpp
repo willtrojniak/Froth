@@ -8,7 +8,7 @@ namespace Froth {
 
 static std::map<std::filesystem::path, ResourceType> s_ResourceExtensionMap = {
     {".obj", ResourceType::Mesh},
-    {".spv", ResourceType::ShaderModule},
+    {".spv", ResourceType::ShaderSource},
     {".png", ResourceType::Texture2D},
     {".jpg", ResourceType::Texture2D},
     {".jpeg", ResourceType::Texture2D},
@@ -83,6 +83,8 @@ std::shared_ptr<Resource> ResourceManager::importResource(const std::filesystem:
   m_LoadedResources[resource->handle()] = resource;
 
   // TODO: Persist resource registry to disk
+
+  FROTH_DEBUG("Resource Manager: Imported resource at %s", filepath.c_str());
 
   return resource;
 }

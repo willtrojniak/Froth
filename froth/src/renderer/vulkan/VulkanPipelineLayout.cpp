@@ -34,6 +34,7 @@ VulkanPipelineLayout::VulkanPipelineLayout(const std::vector<VulkanDescriptorSet
   if (vkCreatePipelineLayout(vctx.device(), &layoutInfo, vctx.allocator(), &m_Layout) != VK_SUCCESS) {
     FROTH_ERROR("Failed to create pipeline layout");
   }
+  FROTH_DEBUG("Created Vulkan Pipeline Layout")
 }
 
 VulkanPipelineLayout::VulkanPipelineLayout(VulkanPipelineLayout &&o)

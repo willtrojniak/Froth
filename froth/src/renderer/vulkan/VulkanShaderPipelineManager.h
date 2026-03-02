@@ -1,6 +1,8 @@
 #pragma once
 
+#include "src/renderer/vulkan/VulkanShaderModuleManager.h"
 #include "src/renderer/vulkan/VulkanShaderPipeline.h"
+#include "src/resources/Material.h"
 #include "src/resources/Resource.h"
 
 #include <map>
@@ -19,8 +21,9 @@ public:
   };
 
   VulkanShaderPipelineManager() = default;
-  const VulkanShaderPipeline &registerMaterial(const Material &mat, const VulkanSwapchainManager &swapchain);
-  const VulkanShaderPipeline &getShader(const Material &mat, const VulkanSwapchainManager &swapchain);
+  const VulkanShaderPipeline &getOrCreatePipeline(VulkanShaderModuleManager &shaderModuleManager,
+                                                  const Material &mat,
+                                                  const VulkanSwapchainManager &swapchain);
 
 private:
   static ShaderPipelineKey getPipelineKey(const Material &mat);

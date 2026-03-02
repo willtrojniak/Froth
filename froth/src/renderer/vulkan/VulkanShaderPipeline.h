@@ -1,14 +1,17 @@
 #pragma once
 
 #include "src/renderer/vulkan/VulkanPipeline.h"
+#include "src/renderer/vulkan/VulkanShaderModule.h"
 #include "src/renderer/vulkan/VulkanSwapchainManager.h"
-#include "src/resources/Material.h"
 
 namespace Froth {
 class VulkanShaderPipeline {
 public:
   VulkanShaderPipeline() = default;
-  VulkanShaderPipeline(const Material &mat, const VulkanSwapchainManager &swapchainManager);
+  VulkanShaderPipeline(const VulkanShaderModule &vertexShader,
+                       const VulkanShaderModule &fragmentShader,
+                       const std::vector<VulkanDescriptorSetLayout> &descriptorSets,
+                       const VulkanSwapchainManager &swapchainManager);
   VulkanShaderPipeline(VulkanShaderPipeline const &) = delete;
   VulkanShaderPipeline &operator=(VulkanShaderPipeline const &) = delete;
   VulkanShaderPipeline(VulkanShaderPipeline &&) noexcept;

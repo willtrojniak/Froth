@@ -16,6 +16,7 @@ VulkanShaderModule::VulkanShaderModule(const std::vector<char> &code) {
   if (vkCreateShaderModule(vctx.device(), &createInfo, vctx.allocator(), &m_ShaderModule) != VK_SUCCESS) {
     FROTH_ERROR("Failed to create shader module");
   }
+  FROTH_DEBUG("Created Vulkan Shader Module")
 }
 
 VulkanShaderModule &VulkanShaderModule::operator=(VulkanShaderModule &&o) noexcept {
