@@ -4,3 +4,6 @@
 [submodule "froth/dependencies/vendor/glm"]
 	path = froth/dependencies/vendor/glm
 	url = git@github.com:g-truc/glm.git
+[submodule "froth/dependencies/vendor/shaderc"]
+	path = froth/dependencies/vendor/shaderc
+	url = https://github.com/google/shaderc.git
