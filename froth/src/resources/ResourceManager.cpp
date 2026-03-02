@@ -9,6 +9,8 @@ namespace Froth {
 static std::map<std::filesystem::path, ResourceType> s_ResourceExtensionMap = {
     {".obj", ResourceType::Mesh},
     {".spv", ResourceType::ShaderSource},
+    {".vert", ResourceType::ShaderSource},
+    {".frag", ResourceType::ShaderSource},
     {".png", ResourceType::Texture2D},
     {".jpg", ResourceType::Texture2D},
     {".jpeg", ResourceType::Texture2D},

@@ -10,7 +10,7 @@ class VulkanShaderModule {
 
 public:
   VulkanShaderModule() = default;
-  VulkanShaderModule(const std::vector<char> &code);
+  VulkanShaderModule(const std::vector<uint32_t> &code);
   VulkanShaderModule(VulkanShaderModule const &) = delete;
   VulkanShaderModule &operator=(VulkanShaderModule const &) = delete;
   VulkanShaderModule &operator=(VulkanShaderModule &&) noexcept;

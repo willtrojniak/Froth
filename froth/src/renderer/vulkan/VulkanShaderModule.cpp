@@ -6,11 +6,11 @@
 
 namespace Froth {
 
-VulkanShaderModule::VulkanShaderModule(const std::vector<char> &code) {
+VulkanShaderModule::VulkanShaderModule(const std::vector<uint32_t> &code) {
   VkShaderModuleCreateInfo createInfo{};
   createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-  createInfo.codeSize = code.size();
-  createInfo.pCode = reinterpret_cast<const uint32_t *>(code.data());
+  createInfo.codeSize = code.size() * sizeof(uint32_t);
+  createInfo.pCode = code.data();
 
   VulkanContext &vctx = VulkanContext::get();
   if (vkCreateShaderModule(vctx.device(), &createInfo, vctx.allocator(), &m_ShaderModule) != VK_SUCCESS) {
