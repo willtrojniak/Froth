@@ -5,6 +5,7 @@
 #include "src/core/events/ApplicationEvent.h"
 #include "src/core/events/EventDispatcher.h"
 #include "src/core/logger/Logger.h"
+#include "src/platform/compiler/ShadercShaderCompiler.h"
 #include "src/renderer/vulkan/VulkanContext.h"
 #include "src/renderer/vulkan/VulkanImage.h"
 #include <cstdint>
@@ -23,7 +24,8 @@ bool getRequiredExtensions(std::vector<const char *> &extensions) noexcept;
 bool hasLayers(const std::vector<const char *> &layers) noexcept;
 
 VulkanRenderer::VulkanRenderer(const Window &window)
-    : m_SwapchainManager(window, MAX_FRAMES_IN_FLIGHT),
+    : m_ShaderModuleManager(std::make_unique<ShadercShaderCompiler>()),
+      m_SwapchainManager(window, MAX_FRAMES_IN_FLIGHT),
       m_GraphicsCommandPool(VulkanContext::get().device().getQueueFamilies().graphics.index) {
 }
 
@@ -32,12 +34,16 @@ VulkanRenderer::~VulkanRenderer() {
 
 VulkanRenderer::VulkanRenderer(VulkanRenderer &&o)
     : m_SwapchainManager(std::move(o.m_SwapchainManager)),
-      m_GraphicsCommandPool(std::move(o.m_GraphicsCommandPool)) {
+      m_GraphicsCommandPool(std::move(o.m_GraphicsCommandPool)),
+      m_ShaderModuleManager(std::move(o.m_ShaderModuleManager)),
+      m_PipelineManager(std::move(o.m_PipelineManager)) {
 }
 
 VulkanRenderer &VulkanRenderer::operator=(VulkanRenderer &&o) {
   m_SwapchainManager = std::move(o.m_SwapchainManager);
   m_GraphicsCommandPool = std::move(o.m_GraphicsCommandPool);
+  m_ShaderModuleManager = std::move(o.m_ShaderModuleManager);
+  m_PipelineManager = std::move(o.m_PipelineManager);
 
   return *this;
 }

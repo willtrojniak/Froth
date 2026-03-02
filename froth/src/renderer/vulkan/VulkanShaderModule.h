@@ -7,8 +7,12 @@
 namespace Froth {
 
 class VulkanShaderModule {
-
 public:
+  enum class ShaderStage {
+    VERTEX = VK_SHADER_STAGE_VERTEX_BIT,
+    FRAGMENT = VK_SHADER_STAGE_FRAGMENT_BIT
+  };
+
   VulkanShaderModule() = default;
   VulkanShaderModule(const std::vector<uint32_t> &code);
   VulkanShaderModule(VulkanShaderModule const &) = delete;

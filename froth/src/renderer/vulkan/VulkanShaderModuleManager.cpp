@@ -1,10 +1,13 @@
 #include "VulkanShaderModuleManager.h"
-#include "shaderc/shaderc.hpp"
 #include "src/core/Application.h"
 #include "src/core/logger/Logger.h"
 #include "src/resources/ShaderSource.h"
 
 namespace Froth {
+
+VulkanShaderModuleManager::VulkanShaderModuleManager(std::unique_ptr<ShaderCompiler> compiler)
+    : m_Compiler(std::move(compiler)) {
+}
 
 const VulkanShaderModule &VulkanShaderModuleManager::getOrCreateShaderModule(const ResourceHandle &handle) {
   if (!m_ShaderModules.contains(handle)) {
@@ -12,25 +15,22 @@ const VulkanShaderModule &VulkanShaderModuleManager::getOrCreateShaderModule(con
     auto metaData = Application::getInstance().resourceManager().getMetadata(handle);
 
     // TODO: Move compilation logic to its own class
-    shaderc::Compiler compiler;
-    shaderc::CompileOptions options;
     const std::string source = std::string(shaderSrc->data().begin(), shaderSrc->data().end());
     FROTH_DEBUG("Compiling:\n%s\n", source.c_str());
 
-    shaderc_shader_kind kind;
+    VulkanShaderModule::ShaderStage stage;
     if (metaData.FilePath.extension() == ".vert")
-      kind = shaderc_glsl_vertex_shader;
+      stage = VulkanShaderModule::ShaderStage::VERTEX;
     else if (metaData.FilePath.extension() == ".frag")
-      kind = shaderc_fragment_shader;
+      stage = VulkanShaderModule::ShaderStage::FRAGMENT;
 
-    auto result = compiler.CompileGlslToSpv(source, kind, metaData.FilePath.filename().c_str());
-    if (result.GetCompilationStatus() != shaderc_compilation_status_success) {
+    auto result = m_Compiler->compileGLSLToSpirV(source, stage);
+    if (!result) {
+      // TODO: Propogate expected return type
       throw std::runtime_error("Failed to compile shader");
     }
 
-    const std::vector<uint32_t> data(result.cbegin(), result.cend());
-
-    m_ShaderModules[handle] = VulkanShaderModule(data);
+    m_ShaderModules[handle] = VulkanShaderModule(result.value());
     FROTH_DEBUG("Vulkan Shader Module: Compiled Shader");
   }
 
