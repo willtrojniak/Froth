@@ -46,16 +46,16 @@ public:
         m_DescriptorPool(2, 4, 8),
         m_Camera(glm::vec3(0.0f, -5.0f, 1.0f), 90.f, 0.f) {
 
-    Froth::ResourceHandle vikingMeshHandle = Froth::Application::getInstance().resourceManager().importResource<Froth::Mesh>(MODEL_PATH.c_str())->handle();
-    Froth::ResourceHandle cubeMeshHandle = Froth::Application::getInstance().resourceManager().importResource<Froth::Mesh>(CUBE_MODEL_PATH.c_str())->handle();
+    Froth::ResourceHandle<Froth::Mesh> vikingMeshHandle = Froth::Application::getInstance().resourceManager().importResource<Froth::Mesh>(MODEL_PATH.c_str());
+    Froth::ResourceHandle<Froth::Mesh> cubeMeshHandle = Froth::Application::getInstance().resourceManager().importResource<Froth::Mesh>(CUBE_MODEL_PATH.c_str());
 
     m_VikingObject = Object(glm::translate(glm::vec3(0.f, 0.f, 0.107647f)), vikingMeshHandle);
     m_Cubes.emplace_back(glm::translate(glm::vec3(-5.0f, -5.0f, -0.1f)) * glm::scale(glm::vec3(10.f, 10.f, 0.1f)), cubeMeshHandle);
     m_Cubes.emplace_back(glm::translate(glm::vec3(2.f, 1.f, -0.01f)), cubeMeshHandle);
     m_Cubes.emplace_back(glm::translate(glm::vec3(-2.f, -2.f, -0.01f)) * glm::scale(glm::vec3(0.5f, 0.5f, 0.5f)), cubeMeshHandle);
 
-    Froth::ResourceHandle vertShaderModule = Froth::Application::getInstance().resourceManager().importResource<Froth::ShaderSource>("../playground/shaders/shader.vert")->handle();
-    Froth::ResourceHandle fragShaderModule = Froth::Application::getInstance().resourceManager().importResource<Froth::ShaderSource>("../playground/shaders/shader.frag")->handle();
+    Froth::ResourceHandle<Froth::ShaderSource> vertShaderModule = Froth::Application::getInstance().resourceManager().importResource<Froth::ShaderSource>("../playground/shaders/shader.vert");
+    Froth::ResourceHandle<Froth::ShaderSource> fragShaderModule = Froth::Application::getInstance().resourceManager().importResource<Froth::ShaderSource>("../playground/shaders/shader.frag");
 
     // TODO: Eventually materials will be parsed from files
     m_Material = Froth::Material(vertShaderModule, fragShaderModule);
@@ -92,7 +92,8 @@ public:
     Froth::Texture2D m_BlankTexture2D(Froth::Extent2D{.width = 1, .height = 1}, &blankImageData);
 
     // Viking Texture
-    std::shared_ptr<Froth::Texture2D> texture = Froth::Application::getInstance().resourceManager().importResource<Froth::Texture2D>(TEXTURE_PATH);
+    Froth::ResourceHandle<Froth::Texture2D> textureHandle = Froth::Application::getInstance().resourceManager().importResource<Froth::Texture2D>(TEXTURE_PATH);
+    std::shared_ptr<Froth::Texture2D> texture = Froth::Application::getInstance().resourceManager().getResource<Froth::Texture2D>(textureHandle);
     m_Sampler = Froth::VulkanSampler::Builder().build();
 
     auto writer = Froth::VulkanDescriptorSet::Writer();

@@ -9,39 +9,41 @@
 
 namespace Froth {
 
-using ResourceRegistry = std::unordered_map<ResourceHandle, ResourceMetadata>;
-using ResourceMap = std::unordered_map<ResourceHandle, std::shared_ptr<Resource>>;
+using ResourceRegistry = std::unordered_map<ResourceHandle<Resource>, ResourceMetadata>;
+using ResourceMap = std::unordered_map<ResourceHandle<Resource>, std::shared_ptr<Resource>>;
 
 class ResourceManager {
 public:
   ResourceManager() = default;
 
+  void update();
+
   template <std::derived_from<Resource> T>
-  std::shared_ptr<T> getResource(ResourceHandle handle) {
+  std::shared_ptr<T> getResource(ResourceHandle<T> handle) {
     auto resource = getResource(handle);
     return std::static_pointer_cast<T>(resource);
   }
 
-  std::shared_ptr<Resource> getResource(ResourceHandle handle);
-  ResourceMetadata getMetadata(ResourceHandle handle) const;
-  ResourceType getResourceType(ResourceHandle handle) const;
+  ResourceMetadata getMetadata(ResourceHandle<Resource> handle) const;
+  ResourceType getResourceType(ResourceHandle<Resource> handle) const;
 
-  bool isHandleValid(ResourceHandle handle) const;
-  bool isHandleLoaded(ResourceHandle handle) const;
+  bool isHandleValid(ResourceHandle<Resource> handle) const;
+  bool isHandleLoaded(ResourceHandle<Resource> handle) const;
 
   template <std::derived_from<Resource> T>
-  std::shared_ptr<T> importResource(const std::filesystem::path &filepath) {
-    auto resource = importResource(filepath);
-    return std::static_pointer_cast<T>(resource);
+  ResourceHandle<T> importResource(const std::filesystem::path &filepath) {
+    auto handle = importResource(filepath);
+    return (ResourceHandle<T>)(handle);
   }
-
-  std::shared_ptr<Resource> importResource(const std::filesystem::path &filepath);
 
 private:
   ResourceRegistry m_ResourceRegistry;
   ResourceMap m_LoadedResources;
 
   static ResourceType getResourceTypeFromExtension(const std::filesystem::path &ext) noexcept;
+  std::shared_ptr<Resource> loadResource(ResourceHandle<Resource> handle);
+  std::shared_ptr<Resource> getResource(ResourceHandle<Resource> handle) const;
+  ResourceHandle<Resource> importResource(const std::filesystem::path &filepath);
 };
 
 } // namespace Froth

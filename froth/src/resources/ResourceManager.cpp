@@ -24,7 +24,12 @@ ResourceType ResourceManager::getResourceTypeFromExtension(const std::filesystem
   return s_ResourceExtensionMap.at(extension);
 }
 
-std::shared_ptr<Resource> ResourceManager::getResource(ResourceHandle handle) {
+void ResourceManager::update() {
+  for (auto &registryEntry : m_ResourceRegistry) {
+  }
+}
+
+std::shared_ptr<Resource> ResourceManager::getResource(ResourceHandle<Resource> handle) const {
   if (!isHandleValid(handle))
     return nullptr;
 
@@ -39,7 +44,7 @@ std::shared_ptr<Resource> ResourceManager::getResource(ResourceHandle handle) {
   return pResource;
 }
 
-ResourceMetadata ResourceManager::getMetadata(ResourceHandle handle) const {
+ResourceMetadata ResourceManager::getMetadata(ResourceHandle<Resource> handle) const {
   static ResourceMetadata s_NullMetadata{};
   auto it = m_ResourceRegistry.find(handle);
   if (it == m_ResourceRegistry.end()) {
@@ -49,25 +54,26 @@ ResourceMetadata ResourceManager::getMetadata(ResourceHandle handle) const {
   return it->second;
 }
 
-ResourceType ResourceManager::getResourceType(ResourceHandle handle) const {
+ResourceType ResourceManager::getResourceType(ResourceHandle<Resource> handle) const {
   if (!isHandleValid(handle))
     return ResourceType::None;
 
   return m_ResourceRegistry.at(handle).Type;
 }
 
-bool ResourceManager::isHandleValid(ResourceHandle handle) const {
+bool ResourceManager::isHandleValid(ResourceHandle<Resource> handle) const {
   return handle != 0 && m_ResourceRegistry.find(handle) != m_ResourceRegistry.end();
 }
 
-bool ResourceManager::isHandleLoaded(ResourceHandle handle) const {
+bool ResourceManager::isHandleLoaded(ResourceHandle<Resource> handle) const {
   return m_LoadedResources.find(handle) != m_LoadedResources.end();
 }
 
-std::shared_ptr<Resource> ResourceManager::importResource(const std::filesystem::path &filepath) {
+ResourceHandle<Resource> ResourceManager::importResource(const std::filesystem::path &filepath) {
   ResourceMetadata metadata{
       .Type = getResourceTypeFromExtension(filepath.extension()),
       .FilePath = filepath,
+      .IsDirty = false,
   };
 
   if (metadata.Type == ResourceType::None) {
@@ -77,18 +83,19 @@ std::shared_ptr<Resource> ResourceManager::importResource(const std::filesystem:
   std::shared_ptr<Resource> resource = ResourceImporter::ImportResource(metadata);
   if (!resource) {
     FROTH_WARN("Failed to import resource from %s", filepath.c_str());
-    return nullptr;
+    return 0;
   }
 
-  m_ResourceRegistry[resource->handle()] = metadata;
+  ResourceHandle<Resource> handle{};
+  m_ResourceRegistry[handle] = metadata;
   // TODO: Consider lazy loading resources
-  m_LoadedResources[resource->handle()] = resource;
+  m_LoadedResources[handle] = resource;
 
   // TODO: Persist resource registry to disk
 
   FROTH_DEBUG("Resource Manager: Imported resource at %s", filepath.c_str());
 
-  return resource;
+  return handle;
 }
 
 } // namespace Froth

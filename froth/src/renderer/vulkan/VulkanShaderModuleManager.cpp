@@ -9,7 +9,7 @@ VulkanShaderModuleManager::VulkanShaderModuleManager(std::unique_ptr<ShaderCompi
     : m_Compiler(std::move(compiler)) {
 }
 
-const VulkanShaderModule &VulkanShaderModuleManager::getOrCreateShaderModule(const ResourceHandle &handle) {
+const VulkanShaderModule &VulkanShaderModuleManager::getOrCreateShaderModule(const ResourceHandle<ShaderSource> &handle) {
   if (!m_ShaderModules.contains(handle)) {
     auto shaderSrc = Application::getInstance().resourceManager().getResource<ShaderSource>(handle);
     auto metaData = Application::getInstance().resourceManager().getMetadata(handle);

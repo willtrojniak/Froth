@@ -5,9 +5,6 @@
 #include <string_view>
 
 namespace Froth {
-
-using ResourceHandle = UUID;
-
 enum class ResourceType : uint16_t {
   None = 0,
   Mesh,
@@ -17,13 +14,12 @@ enum class ResourceType : uint16_t {
 
 class Resource {
 public:
-  ResourceHandle handle() const { return m_Handle; }
   virtual ResourceType type() const noexcept = 0;
 
   static std::string_view ResourceTypeToString(ResourceType type);
-
-private:
-  ResourceHandle m_Handle; // Auto generates on creation
 };
+
+template <std::derived_from<Resource> T>
+using ResourceHandle = UUID;
 
 } // namespace Froth

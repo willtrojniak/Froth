@@ -12,8 +12,8 @@ namespace Froth {
 class VulkanShaderPipelineManager {
 public:
   struct ShaderPipelineKey {
-    ResourceHandle vertexShaderHandle;
-    ResourceHandle fragmentShaderHandle;
+    ResourceHandle<ShaderSource> vertexShaderHandle;
+    ResourceHandle<ShaderSource> fragmentShaderHandle;
 
     bool operator<(const ShaderPipelineKey &o) const {
       return vertexShaderHandle < o.vertexShaderHandle || (vertexShaderHandle == o.vertexShaderHandle && fragmentShaderHandle < o.fragmentShaderHandle);
