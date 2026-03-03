@@ -1,4 +1,5 @@
 #include "ShaderSourceImporter.h"
+#include "src/core/logger/Logger.h"
 #include "src/platform/filesystem/Filesystem.h"
 
 namespace Froth {
@@ -8,9 +9,13 @@ std::shared_ptr<ShaderSource> ShaderSourceImporter::ImportShaderSource(const Res
 };
 
 std::shared_ptr<ShaderSource> ShaderSourceImporter::LoadShaderSource(const std::filesystem::path &path) {
-  const std::vector<char> code = Filesystem::readFile(path);
+  auto code = Filesystem::readFile(path);
+  if (!code) {
+    FROTH_WARN("Shader Source Importer: Failed to import shader");
+    return nullptr;
+  }
 
-  return std::make_shared<ShaderSource>(code);
+  return std::make_shared<ShaderSource>(code.value());
 };
 
 } // namespace Froth

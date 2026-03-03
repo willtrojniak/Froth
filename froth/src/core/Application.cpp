@@ -50,6 +50,11 @@ void Application::Run() {
   while (m_Running) {
     Window::pollEvents();
 
+    // Resource manager polling
+    // TODO: Disable in production?
+    // TODO: Move to separate thread
+    m_ResourceManager.onUpdate(deltaT);
+
     // Update loop
     for (std::shared_ptr<Layer> layer : m_LayerStack) {
       layer->onUpdate(deltaT);

@@ -16,7 +16,8 @@ class ResourceManager {
 public:
   ResourceManager() = default;
 
-  void update();
+  void onUpdate(float deltaT);
+  void pollFiles();
 
   template <std::derived_from<Resource> T>
   std::shared_ptr<T> getResource(ResourceHandle<T> handle) {
@@ -39,6 +40,7 @@ public:
 private:
   ResourceRegistry m_ResourceRegistry;
   ResourceMap m_LoadedResources;
+  float m_SecondsSinceLastPoll = 0.f;
 
   static ResourceType getResourceTypeFromExtension(const std::filesystem::path &ext) noexcept;
   std::shared_ptr<Resource> loadResource(ResourceHandle<Resource> handle);

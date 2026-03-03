@@ -10,6 +10,7 @@ struct ResourceMetadata {
   ResourceType Type = ResourceType::None;
   std::filesystem::path FilePath;
   bool IsDirty = false;
+  size_t FileHash;
   std::filesystem::file_time_type LastWriteTime;
 
   operator bool() const { return Type != ResourceType::None; }

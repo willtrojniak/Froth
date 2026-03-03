@@ -9,13 +9,14 @@
 
 namespace Froth::Filesystem {
 
-std::vector<char> readFile(const std::filesystem::path &filename) {
+std::expected<std::vector<char>, bool> readFile(const std::filesystem::path &filename) {
   std::vector<char> buffer;
   try {
     size_t filesize = std::filesystem::file_size(filename);
     std::ifstream file(filename, std::ios::ate | std::ios::binary);
     if (!file.is_open()) {
-      FROTH_ERROR("Could not open file %s", filename.c_str());
+      FROTH_WARN("Exception while reading file: %s", filename.c_str())
+      return std::unexpected(false);
     }
     buffer.resize(filesize);
     file.seekg(0);
@@ -23,10 +24,31 @@ std::vector<char> readFile(const std::filesystem::path &filename) {
     file.close();
 
   } catch (std::exception &e) {
-    FROTH_ERROR("Exception while reading file: %s", e.what())
+    FROTH_WARN("Exception while reading file: %s", e.what())
+    return std::unexpected(false);
   }
 
   return buffer;
+}
+std::expected<size_t, bool> fileHash(const std::filesystem::path &path) {
+  auto fileContents = readFile(path);
+  if (!fileContents)
+    return std::unexpected<bool>(fileContents.error());
+
+  return fileHash(fileContents.value());
+}
+
+size_t fileHash(const std::vector<char> &filecontents) {
+  std::string s(filecontents.begin(), filecontents.end());
+  return std::hash<std::string>{}(s);
+}
+
+std::expected<std::filesystem::file_time_type, bool> readFileLastWriteTime(const std::filesystem::path &filename) {
+  try {
+    return std::filesystem::last_write_time(filename);
+  } catch (const std::filesystem::filesystem_error &e) {
+    return std::unexpected(false);
+  }
 }
 
 void *loadImage(const char *path, int &width, int &height, int &channels) {
