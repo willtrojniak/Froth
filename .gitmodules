@@ -7,3 +7,6 @@
 [submodule "froth/dependencies/vendor/shaderc"]
 	path = froth/dependencies/vendor/shaderc
 	url = https://github.com/google/shaderc.git
+[submodule "froth/dependencies/vendor/SPIRV-Reflect"]
+	path = froth/dependencies/vendor/SPIRV-Reflect
+	url = https://github.com/KhronosGroup/SPIRV-Reflect.git

@@ -24,6 +24,8 @@ file(GLOB_RECURSE ENGINE_HEADERS src/**.h)
 
 add_library(${PROJECT_NAME}
   ${ENGINE_SOURCES} ${ENGINE_HEADERS}
+  dependencies/vendor/SPIRV-Reflect/spirv_reflect.cpp
+  dependencies/vendor/SPIRV-Reflect/spirv_reflect.h
   dependencies/vendor/stb/stb/stb_image.h
   dependencies/vendor/tiny_obj_loader/tiny_obj_loader.h
 )
@@ -39,6 +41,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   dependencies/vendor/glm
   dependencies/vendor/glfw/include
   dependencies/vendor/shaderc/libshaderc/include
+  dependencies/vendor/SPIRV-Reflect
   dependencies/vendor/stb
   dependencies/vendor/tiny_obj_loader
 )
