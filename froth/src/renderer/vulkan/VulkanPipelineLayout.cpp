@@ -7,11 +7,7 @@
 
 namespace Froth {
 
-VulkanPipelineLayout::VulkanPipelineLayout(const std::vector<VulkanDescriptorSetLayout> &descSetLayouts) {
-  std::vector<VkDescriptorSetLayout> vkDescSetLayouts(descSetLayouts.size());
-  for (size_t i = 0; i < descSetLayouts.size(); i++) {
-    vkDescSetLayouts[i] = descSetLayouts[i];
-  }
+VulkanPipelineLayout::VulkanPipelineLayout(const std::vector<VkDescriptorSetLayout> &descSetLayouts) {
 
   // TODO: Configurable push constants?
   FROTH_INFO("Maximum push constant size: %u bytes", VulkanContext::get().device().props().limits.maxPushConstantsSize);
@@ -26,7 +22,7 @@ VulkanPipelineLayout::VulkanPipelineLayout(const std::vector<VulkanDescriptorSet
   VkPipelineLayoutCreateInfo layoutInfo{};
   layoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
   layoutInfo.setLayoutCount = static_cast<uint32_t>(descSetLayouts.size());
-  layoutInfo.pSetLayouts = vkDescSetLayouts.data();
+  layoutInfo.pSetLayouts = descSetLayouts.data();
   layoutInfo.pushConstantRangeCount = pushConstantRanges.size();
   layoutInfo.pPushConstantRanges = pushConstantRanges.data();
 

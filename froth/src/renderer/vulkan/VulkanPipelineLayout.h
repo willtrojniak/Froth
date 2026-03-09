@@ -1,13 +1,14 @@
 #pragma once
 
-#include "src/renderer/vulkan/VulkanDescriptorSetLayout.h"
+#include <vector>
+#include <vulkan/vulkan.h>
 
 namespace Froth {
 
 class VulkanPipelineLayout {
 public:
   VulkanPipelineLayout() = default;
-  VulkanPipelineLayout(const std::vector<VulkanDescriptorSetLayout> &descSetLayouts);
+  VulkanPipelineLayout(const std::vector<VkDescriptorSetLayout> &descSetLayouts);
   VulkanPipelineLayout(VulkanPipelineLayout const &) = delete;
   void operator=(VulkanPipelineLayout const &) = delete;
   VulkanPipelineLayout(VulkanPipelineLayout &&);

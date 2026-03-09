@@ -1,7 +1,7 @@
 #pragma once
 
-#include "VulkanDevice.h"
 #include <vector>
+#include <vulkan/vulkan.h>
 
 namespace Froth {
 

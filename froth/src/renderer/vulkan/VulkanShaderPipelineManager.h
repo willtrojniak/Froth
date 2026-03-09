@@ -1,5 +1,6 @@
 #pragma once
 
+#include "src/renderer/vulkan/VulkanDescriptorSetLayout.h"
 #include "src/renderer/vulkan/VulkanShaderModuleManager.h"
 #include "src/renderer/vulkan/VulkanShaderPipeline.h"
 #include "src/resources/Material.h"
@@ -24,11 +25,18 @@ public:
   const VulkanShaderPipeline &getOrCreatePipeline(VulkanShaderModuleManager &shaderModuleManager,
                                                   const Material &mat,
                                                   const VulkanSwapchainManager &swapchain);
+  const std::expected<std::vector<VkDescriptorSetLayout>, bool> getMaterialDescSetLayouts(const Material &mat);
 
 private:
+  struct PipelineData {
+    VulkanShaderPipeline pipeline;
+    std::vector<VulkanShaderModule::DescriptorSetLayoutData> descSets;
+  };
+
   static ShaderPipelineKey getPipelineKey(const Material &mat);
 
-  std::map<ShaderPipelineKey, VulkanShaderPipeline> m_Cache;
+  std::unordered_map<VulkanShaderModule::DescriptorSetLayoutData, VulkanDescriptorSetLayout> m_LayoutCache;
+  std::map<ShaderPipelineKey, PipelineData> m_PipelineCache;
 };
 
 } // namespace Froth

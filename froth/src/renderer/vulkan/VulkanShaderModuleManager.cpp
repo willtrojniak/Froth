@@ -14,9 +14,7 @@ const VulkanShaderModule &VulkanShaderModuleManager::getOrCreateShaderModule(con
     auto shaderSrc = Application::getInstance().resourceManager().getResource<ShaderSource>(handle);
     auto metaData = Application::getInstance().resourceManager().getMetadata(handle);
 
-    // TODO: Move compilation logic to its own class
     const std::string source = std::string(shaderSrc->data().begin(), shaderSrc->data().end());
-    FROTH_DEBUG("Compiling:\n%s\n", source.c_str());
 
     VulkanShaderModule::ShaderStage stage;
     if (metaData.FilePath.extension() == ".vert")

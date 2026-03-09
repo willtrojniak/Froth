@@ -7,7 +7,7 @@ namespace Froth {
 
 VulkanShaderPipeline::VulkanShaderPipeline(const VulkanShaderModule &vertexShader,
                                            const VulkanShaderModule &fragmentShader,
-                                           const std::vector<VulkanDescriptorSetLayout> &descriptorSets,
+                                           const std::vector<VkDescriptorSetLayout> &descriptorSets,
                                            const VulkanSwapchainManager &swapchainManager) {
 
   // TODO: Bring out push constants to make configurable

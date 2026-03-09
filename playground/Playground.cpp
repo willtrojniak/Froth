@@ -74,7 +74,7 @@ public:
     lightUBO.lights[2].color = glm::vec4(0.8f, 0.3f, 0.1f, 1.0);
     lightUBO.lights[2].params = glm::vec4(0.0f, 0.0f, 0.3f, 1.0);
 
-    m_DescriptorSets = m_DescriptorPool.allocateDescriptorSets(std::vector<VkDescriptorSetLayout>(2, m_Material.descriptorSetLayouts()[0]));
+    m_DescriptorSets = m_DescriptorPool.allocateDescriptorSets(std::vector<VkDescriptorSetLayout>(2, m_Renderer.getMaterialDescSetLayouts(m_Material).value()[0]));
 
     m_ViewProjUbos.reserve(2);
     m_ViewProjUbos.emplace_back(sizeof(ViewProjUbo));

@@ -38,6 +38,11 @@ public:
 
   void registerMaterial(const Material &mat);
 
+  // TODO: Refactor
+  std::expected<std::vector<VkDescriptorSetLayout>, bool> getMaterialDescSetLayouts(const Material &mat) {
+    return m_PipelineManager.getMaterialDescSetLayouts(mat);
+  }
+
   uint32_t currentFrame() const { return m_SwapchainManager.currentFrame(); }
   virtual bool beginFrame() override;
   virtual void beginRenderPass() override;
