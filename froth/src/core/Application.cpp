@@ -31,6 +31,7 @@ Application::Application() {
   }
   m_Window->setEventCallbackFunction(BIND_FUNC(onEvent));
   m_Window->setCursorMode(Window::CursorMode::DISABLED);
+  m_ResourceManager.setEventCallbackFunction(BIND_FUNC(onEvent));
 
   Renderer::init(*m_Window);
   FROTH_INFO("RENDERER INITIALIZED")
@@ -82,6 +83,9 @@ void Application::onEvent(const Event &e) {
       return;
   }
   if (m_InputController.onEvent(e))
+    return;
+
+  if (m_Renderer.onEvent(e))
     return;
 
   EventDispatcher dispatcher = EventDispatcher(e);

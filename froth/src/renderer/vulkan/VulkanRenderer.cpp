@@ -60,11 +60,23 @@ void VulkanRenderer::shutdown() {
 bool VulkanRenderer::onEvent(const Event &e) {
   EventDispatcher dispatcher = EventDispatcher(e);
   dispatcher.dispatch<FramebufferResizeEvent>(BIND_FUNC(onFramebufferResize));
+  dispatcher.dispatch<ResourceLoadedEvent>(BIND_FUNC(onResourceLoaded));
   return dispatcher.isHandled();
 }
 
 bool VulkanRenderer::onFramebufferResize(FramebufferResizeEvent &e) {
   m_SwapchainManager.onWindowFramebufferResize(e.width(), e.height());
+  return false;
+}
+
+bool VulkanRenderer::onResourceLoaded(ResourceLoadedEvent &e) {
+  switch (e.metadata().Type) {
+  case ResourceType::ShaderSource:
+    m_PipelineManager.onShaderLoaded(m_ShaderModuleManager, e.handle(), m_SwapchainManager);
+    break;
+  default:
+  }
+
   return false;
 }
 

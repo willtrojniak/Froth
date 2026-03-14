@@ -25,7 +25,6 @@ layout(push_constant) uniform constants {
     uint texIndex;
 } pcs;
 
-const vec3 lightAmbient = vec3(0.05, 0.05, 0.05);
 const vec3 lightDir = vec3(0.4, 0.8, 1.0);
 const vec3 lightCol = vec3(0.6, 0.6, 0.6);
 

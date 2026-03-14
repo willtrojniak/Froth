@@ -43,6 +43,11 @@ VulkanShaderModule::VulkanShaderModule(const std::vector<uint32_t> &code) {
   FROTH_DEBUG("Created Vulkan Shader Module, Set Count: %u", m_DescriptorSetLayoutData.size())
 }
 
+VulkanShaderModule::VulkanShaderModule(VulkanShaderModule &&o) noexcept
+    : m_ShaderModule(o.m_ShaderModule), m_DescriptorSetLayoutData(std::move(o.m_DescriptorSetLayoutData)) {
+  o.m_ShaderModule = nullptr;
+}
+
 VulkanShaderModule &VulkanShaderModule::operator=(VulkanShaderModule &&o) noexcept {
   m_ShaderModule = o.m_ShaderModule;
   m_DescriptorSetLayoutData = std::move(o.m_DescriptorSetLayoutData);

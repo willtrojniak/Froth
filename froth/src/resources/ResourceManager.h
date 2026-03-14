@@ -2,6 +2,7 @@
 
 #include "Resource.h"
 #include "ResourceMetadata.h"
+#include "src/core/events/Event.h"
 
 #include <filesystem>
 #include <memory>
@@ -16,6 +17,7 @@ class ResourceManager {
 public:
   ResourceManager() = default;
 
+  void setEventCallbackFunction(const std::function<void(const Event &e)> &);
   void onUpdate(float deltaT);
   void pollFiles();
 
@@ -41,6 +43,7 @@ private:
   ResourceRegistry m_ResourceRegistry;
   ResourceMap m_LoadedResources;
   float m_SecondsSinceLastPoll = 0.f;
+  std::function<void(const Event &)> m_EventCallbackFn = nullptr;
 
   static ResourceType getResourceTypeFromExtension(const std::filesystem::path &ext) noexcept;
   std::shared_ptr<Resource> loadResource(ResourceHandle<Resource> handle);

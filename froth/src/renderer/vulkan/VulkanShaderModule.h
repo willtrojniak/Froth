@@ -26,6 +26,7 @@ public:
   VulkanShaderModule(const std::vector<uint32_t> &code);
   VulkanShaderModule(VulkanShaderModule const &) = delete;
   VulkanShaderModule &operator=(VulkanShaderModule const &) = delete;
+  VulkanShaderModule(VulkanShaderModule &&) noexcept;
   VulkanShaderModule &operator=(VulkanShaderModule &&) noexcept;
   ~VulkanShaderModule();
 

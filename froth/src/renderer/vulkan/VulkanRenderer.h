@@ -35,6 +35,7 @@ public:
 
   virtual bool onEvent(const Event &e) override;
   bool onFramebufferResize(FramebufferResizeEvent &e);
+  bool onResourceLoaded(ResourceLoadedEvent &e);
 
   void registerMaterial(const Material &mat);
 

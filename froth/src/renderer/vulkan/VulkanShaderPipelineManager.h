@@ -25,6 +25,12 @@ public:
   const VulkanShaderPipeline &getOrCreatePipeline(VulkanShaderModuleManager &shaderModuleManager,
                                                   const Material &mat,
                                                   const VulkanSwapchainManager &swapchain);
+  const std::optional<VulkanShaderPipeline> recreatePipeline(VulkanShaderModuleManager &shaderModuleManager,
+                                                             const Material &mat,
+                                                             const VulkanSwapchainManager &swapchain);
+  void onShaderLoaded(VulkanShaderModuleManager &shaderModuleManager,
+                      ResourceHandle<ShaderSource> handle,
+                      const VulkanSwapchainManager &swapchain);
   const std::expected<std::vector<VkDescriptorSetLayout>, bool> getMaterialDescSetLayouts(const Material &mat);
 
 private:
@@ -34,8 +40,12 @@ private:
   };
 
   static ShaderPipelineKey getPipelineKey(const Material &mat);
+  PipelineData createPipeline(VulkanShaderModuleManager &shaderModuleManager,
+                              const Material &mat,
+                              const VulkanSwapchainManager &swapchain);
 
   std::unordered_map<VulkanShaderModule::DescriptorSetLayoutData, VulkanDescriptorSetLayout> m_LayoutCache;
+  std::map<ResourceHandle<ShaderSource>, std::vector<Material>> m_ShaderDependents;
   std::map<ShaderPipelineKey, PipelineData> m_PipelineCache;
 };
 

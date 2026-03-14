@@ -10,6 +10,7 @@ enum class EventType {
   WindowFocus,
   WindowLoseFocus,
   FramebufferResize,
+  ResourceLoaded,
   KeyPressed,
   KeyReleased,
   MouseButtonPressed,
