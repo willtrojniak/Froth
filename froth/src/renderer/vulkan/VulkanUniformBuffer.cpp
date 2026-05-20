@@ -1,6 +1,8 @@
 
 #include "VulkanUniformBuffer.h"
+
 #include <algorithm>
+#include <cstring>
 #include <utility>
 
 namespace Froth {

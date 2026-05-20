@@ -21,7 +21,7 @@ private:
 namespace std {
 
 template <>
-struct std::hash<Froth::UUID> {
+struct hash<Froth::UUID> {
   std::size_t operator()(const Froth::UUID &uuid) const noexcept {
     return hash<uint64_t>()(static_cast<uint64_t>(uuid));
   }

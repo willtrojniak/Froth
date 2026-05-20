@@ -1,6 +1,8 @@
 #pragma once
 
 #include "events/Event.h"
+#include <cstdint>
+
 namespace Froth {
 class Layer {
 public:

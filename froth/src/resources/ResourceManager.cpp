@@ -125,8 +125,8 @@ ResourceHandle<Resource> ResourceManager::importResource(const std::filesystem::
   ResourceMetadata metadata{
       .Type = getResourceTypeFromExtension(filepath.extension()),
       .FilePath = filepath,
-      .LastWriteTime = fileLastWriteTime.value(),
       .FileHash = Filesystem::fileHash(filecontents.value()),
+      .LastWriteTime = fileLastWriteTime.value(),
   };
 
   if (metadata.Type == ResourceType::None) {

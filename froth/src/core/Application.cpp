@@ -47,6 +47,7 @@ void Application::Run() {
   auto timer = std::chrono::high_resolution_clock();
   auto tBegin = timer.now();
   float deltaT = 1.f / 30.f;
+  FROTH_INFO("APPLICATION RUN")
 
   while (m_Running) {
     Window::pollEvents();

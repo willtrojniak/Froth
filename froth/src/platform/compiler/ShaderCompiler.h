@@ -3,6 +3,7 @@
 #include "src/renderer/vulkan/VulkanShaderModule.h"
 
 #include <expected>
+#include <string>
 #include <vector>
 
 namespace Froth {

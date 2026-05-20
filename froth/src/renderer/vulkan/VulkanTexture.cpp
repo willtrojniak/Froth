@@ -4,6 +4,8 @@
 #include "src/renderer/vulkan/VulkanCommandPool.h"
 #include "src/renderer/vulkan/VulkanRenderer.h"
 
+#include <cstring>
+
 namespace Froth {
 
 VulkanTexture::VulkanTexture(const VkExtent3D &extent, VkFormat format)

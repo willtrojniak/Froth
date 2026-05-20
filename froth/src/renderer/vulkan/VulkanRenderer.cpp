@@ -75,6 +75,7 @@ bool VulkanRenderer::onResourceLoaded(ResourceLoadedEvent &e) {
     m_PipelineManager.onShaderLoaded(m_ShaderModuleManager, e.handle(), m_SwapchainManager);
     break;
   default:
+    break;
   }
 
   return false;

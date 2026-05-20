@@ -53,7 +53,7 @@ private:
 
 namespace std {
 template <>
-struct std::hash<Froth::VulkanShaderPipelineManager::ShaderPipelineKey> {
+struct hash<Froth::VulkanShaderPipelineManager::ShaderPipelineKey> {
   std::size_t operator()(const Froth::VulkanShaderPipelineManager::ShaderPipelineKey &key) const noexcept {
     // FIXME: Better hash?
     return hash<uint64_t>()(static_cast<uint64_t>(key.fragmentShaderHandle + key.vertexShaderHandle));

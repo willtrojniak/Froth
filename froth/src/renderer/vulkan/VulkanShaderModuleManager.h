@@ -6,6 +6,8 @@
 #include "src/resources/ShaderSource.h"
 
 #include <map>
+#include <memory>
+#include <optional>
 
 namespace Froth {
 class VulkanShaderModuleManager {

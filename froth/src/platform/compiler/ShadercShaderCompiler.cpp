@@ -11,6 +11,8 @@ static shaderc_shader_kind getShadeKindFromStage(VulkanShaderModule::ShaderStage
   case VulkanShaderModule::ShaderStage::FRAGMENT:
     return shaderc_fragment_shader;
   }
+
+  throw std::runtime_error("Unknown shader stage");
 }
 
 std::expected<std::vector<uint32_t>, bool> ShadercShaderCompiler::compileGLSLToSpirV(const std::string &source, VulkanShaderModule::ShaderStage stage) {
