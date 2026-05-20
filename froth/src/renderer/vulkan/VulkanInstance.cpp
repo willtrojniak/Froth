@@ -2,6 +2,7 @@
 #include "Defines.h"
 #include "src/core/logger/Logger.h"
 #include "src/platform/window/Window.h"
+#include "src/renderer/vulkan/VulkanContext.h"
 
 #include <set>
 #include <vector>
@@ -24,6 +25,7 @@ VulkanInstance::VulkanInstance(const VkAllocationCallbacks *allocator) {
 
   // Extensions
   std::vector<const char *> extensions;
+
   if (!getRequiredExtensions(extensions)) {
     FROTH_ERROR("Failed to retreive required Vulkan extensions")
   }
@@ -34,7 +36,7 @@ VulkanInstance::VulkanInstance(const VkAllocationCallbacks *allocator) {
 
   // Validation Layers
   std::vector<const char *> validationLayers{};
-#ifndef FROTH_DEBUG
+#ifdef FROTH_DEBUG
   validationLayers.emplace_back(VK_LAYER_KHRONOS_validation);
 #endif // FROTH_DEBUG
   if (!hasLayers(validationLayers)) {
@@ -89,8 +91,10 @@ bool getRequiredExtensions(std::vector<const char *> &extensions) noexcept {
     extensions[i] = requiredWindowExtensions[i];
   }
 
-  // TODO: Only enable for MacOS
+#ifdef FROTH_PLATFORM_MACOS
+  FROTH_DEBUG("Requiring MacOS Vulkan Extensions");
   extensions.emplace_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+#endif // FROTH_PLATFORM_MACOS
 
   return true;
 }
