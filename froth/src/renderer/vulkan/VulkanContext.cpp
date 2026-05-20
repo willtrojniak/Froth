@@ -30,12 +30,12 @@ void VulkanContext::init(const Window &window) {
 
     requirements.extensions.emplace_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
 
-#ifdef FROTH_PLATFORM_MACOS
+#if FROTH_PLATFORM_MACOS
     FROTH_DEBUG("Vulkan Device Enabling MacOS Portability Subset Extension");
     requirements.extensions.emplace_back("VK_KHR_portability_subset");
 #endif // FROTH_PLATFORM_MACOS
 
-#ifdef FROTH_DEBUG
+#if FROTH_BUILD_DEBUG
     FROTH_DEBUG("Vulkan Device Enabling Validation Extension");
     requirements.layers.emplace_back("VK_LAYER_KHRONOS_validation");
 #endif // FROTH_BUILD_DEBUG

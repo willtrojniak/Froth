@@ -36,9 +36,9 @@ VulkanInstance::VulkanInstance(const VkAllocationCallbacks *allocator) {
 
   // Validation Layers
   std::vector<const char *> validationLayers{};
-#ifdef FROTH_DEBUG
+#if FROTH_BUILD_DEBUG
   validationLayers.emplace_back(VK_LAYER_KHRONOS_validation);
-#endif // FROTH_DEBUG
+#endif // FROTH_BUILD_DEBUG
   if (!hasLayers(validationLayers)) {
     FROTH_ERROR("Vulkan does not support required layers");
   }
@@ -47,8 +47,10 @@ VulkanInstance::VulkanInstance(const VkAllocationCallbacks *allocator) {
   createInfo.pApplicationInfo = &appInfo;
   createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
   createInfo.ppEnabledExtensionNames = extensions.data();
-  // TODO: Only on MacOS
+
+#if FROTH_PLATFORM_MACOS
   createInfo.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+#endif
   createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
   createInfo.ppEnabledLayerNames = validationLayers.data();
 
@@ -91,7 +93,7 @@ bool getRequiredExtensions(std::vector<const char *> &extensions) noexcept {
     extensions[i] = requiredWindowExtensions[i];
   }
 
-#ifdef FROTH_PLATFORM_MACOS
+#if FROTH_PLATFORM_MACOS
   FROTH_DEBUG("Requiring MacOS Vulkan Extensions");
   extensions.emplace_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
 #endif // FROTH_PLATFORM_MACOS

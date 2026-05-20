@@ -8,8 +8,7 @@
 #cmakedefine01 FROTH_PLATFORM_LINUX
 #cmakedefine01 FROTH_PLATFORM_WIN
 
-#ifdef FROTH_DEBUG
-#endif // FROTH_DEBUG
+#cmakedefine01 FROTH_BUILD_DEBUG
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE

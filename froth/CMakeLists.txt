@@ -17,6 +17,14 @@ else()
   message("WARNING: Target platform '${CMAKE_SYSTEM_NAME}' not supported")
 endif()
 
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Debug)
+endif()
+
+if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
+  set(FROTH_BUILD_DEBUG TRUE)
+endif()
+
 configure_file(Defines.h.in Defines.h)
 
 file(GLOB_RECURSE ENGINE_SOURCES src/**.cpp)
